@@ -32,6 +32,9 @@ public class User {
     private LocalDateTime resetTokenExpiry;
     private String verificationToken;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private Abonnement abonnement;
+
     public Long getIdUser() {
         return idUser;
     }
@@ -158,6 +161,14 @@ public class User {
 
     public void setIs_verified(Boolean is_verified) {
         this.is_verified = is_verified;
+    }
+
+    public Abonnement getAbonnement() {
+        return abonnement;
+    }
+
+    public void setAbonnement(Abonnement abonnement) {
+        this.abonnement = abonnement;
     }
 
 
