@@ -172,7 +172,7 @@ public class MenuServiceImpl implements MenuService {
                 .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
 
         // Vérifier que l'utilisateur est bien un médecin
-        if (!doctor.getRole().equals(Role.Medecin)) {
+        if (!doctor.getRole().equals(Role.Medcin)) {
             throw new RuntimeException("Seuls les médecins peuvent valider les menus");
         }
 
