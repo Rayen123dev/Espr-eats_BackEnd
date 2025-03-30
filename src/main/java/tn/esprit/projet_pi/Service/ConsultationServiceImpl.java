@@ -18,11 +18,13 @@ public class ConsultationServiceImpl implements IConsultationService {
 
     private final ConsultationRepository consultationRepository;
     private final UserRepo userRepo;
+    private final UserService userService;
 
 
-    public ConsultationServiceImpl(ConsultationRepository consultationRepository, UserRepo userRepo) {
+    public ConsultationServiceImpl(ConsultationRepository consultationRepository, UserRepo userRepo, UserService userService) {
         this.consultationRepository = consultationRepository;
         this.userRepo = userRepo;
+        this.userService = userService;
     }
 
 
@@ -36,8 +38,11 @@ public class ConsultationServiceImpl implements IConsultationService {
                 .orElseThrow(() -> new RuntimeException("Étudiant non trouvé"));
 
         // Cherche le médecin (tu peux adapter selon ta logique si tu en as plusieurs)
-        User medecin = userRepo.findByRole(Role.Medcin)
-                .orElseThrow(() -> new RuntimeException("Aucun médecin trouvé"));
+        User medecin = userService.getUserByRole(String.valueOf(Role.Medcin))
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
+
 
 
         // Affecte les utilisateurs
