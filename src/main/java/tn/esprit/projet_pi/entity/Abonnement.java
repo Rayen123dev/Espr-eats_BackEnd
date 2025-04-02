@@ -35,11 +35,11 @@ public class Abonnement {
     private Boolean isBlocked = false;
     private Boolean isConfirmed = false;
 
-    @OneToMany(mappedBy = "abonnement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "abonnement", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     @JsonIgnore
     private List<Transaction> transactions;
 
-    @OneToOne(mappedBy = "abonnement")
+    @OneToOne(mappedBy = "abonnement",fetch = FetchType.EAGER)
     @JsonIgnore
     private User user;
 

@@ -54,6 +54,7 @@ public class AbonnementController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/get/{userId}/{idAbonnement}")
     public ResponseEntity<Abonnement> getAbonnementById(@PathVariable Long userId, @PathVariable Long idAbonnement) {
         Abonnement abonnement = abonnementService.getAbonnementById(userId, idAbonnement);
@@ -65,6 +66,7 @@ public class AbonnementController {
     }
 
     //confirm the abonnement
+    @CrossOrigin(origins = "http://localhost:4200")
     @PutMapping("/confirm/{userId}/{confirmationCode}")
     public ResponseEntity<?> confirmAbonnement(
             @PathVariable Long userId,

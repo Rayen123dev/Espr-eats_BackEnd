@@ -77,12 +77,32 @@ public class AbonnementService implements IAbonnement {
     }
 
     @Override
+    @Transactional
     public void deleteAbonnement(Long userId, Long idAbonnement) {
+        // Check if the abonnement is blocked
         checkIfAbonnementBlocked(idAbonnement);
-        Abonnement abonnement = abonnementRepository.findById(idAbonnement).orElse(null);
-        if (abonnement != null && abonnement.getUser().getId_user().equals(userId)) {
-            abonnementRepository.delete(abonnement);
+
+        // Fetch the abonnement
+        Abonnement abonnement = abonnementRepository.findById(idAbonnement)
+                .orElseThrow(() -> new RuntimeException("Abonnement not found with ID: " + idAbonnement));
+
+        // Verify that the abonnement belongs to the user
+        if (!abonnement.getUser().getId_user().equals(userId)) {
+            throw new RuntimeException("Abonnement does not belong to user with ID: " + userId);
         }
+
+        // Fetch and delete all associated transactions
+        List<Transaction> transactions = transactionRepository.findByAbonnement(abonnement);
+        if (!transactions.isEmpty()) {
+            transactionRepository.deleteAll(transactions);
+        }
+
+        // Remove the abonnement from the user
+        User user = abonnement.getUser();
+        user.setAbonnement(null);
+
+        // Delete the abonnement
+        abonnementRepository.delete(abonnement);
     }
 
     @Override
@@ -253,6 +273,7 @@ public class AbonnementService implements IAbonnement {
     public List<Abonnement> getAllAbonnementsByStatus(AbonnementStatus abonnementStatus) {
         return abonnementRepository.findAllByAbonnementStatus(abonnementStatus);
     }
+
 }
 
 //TODO : nbre tentiative , ken suspect sta3ml l code akther men 3 fois , l compte mte3u yetbloka pour une durée de 24h
