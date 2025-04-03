@@ -1,6 +1,7 @@
 package tn.esprit.projet_pi.Service;
 
 import tn.esprit.projet_pi.entity.Menu;
+import tn.esprit.projet_pi.entity.RegimeAlimentaire;
 
 import java.util.List;
 
@@ -18,5 +19,6 @@ public interface MenuService {
 
     // Method to schedule automatic menu generation
     void scheduleMenuGeneration();
+    public List<RegimeAlimentaire> returnregime ();
 
 }

@@ -1,5 +1,7 @@
 package tn.esprit.projet_pi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ public class Menu {
     private RegimeAlimentaireType regime;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "created_by")
     private User createdBy;
 
@@ -29,6 +32,7 @@ public class Menu {
 
     // New field to reference the doctor who validated the menu
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "validated_by")
     private User validatedBy;
 
@@ -38,6 +42,7 @@ public class Menu {
             joinColumns = @JoinColumn(name = "menu_id"),
             inverseJoinColumns = @JoinColumn(name = "plats_id")
     )
+    @JsonManagedReference
     private List<Plat> plats;
 
     public Long getId() {

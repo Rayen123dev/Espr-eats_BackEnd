@@ -52,7 +52,7 @@ public class MenuController {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         if (!user.getRole().equals(Role.Staff) && !user.getRole().equals(Role.Admin) &&
-                !user.getRole().equals(Role.Medcin)) {
+                !user.getRole().equals(Role.Medecin)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Accès refusé : accès restreint");
         }
@@ -75,7 +75,7 @@ public class MenuController {
         User doctor = userRepository.findByidUser(doctorId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        if (!doctor.getRole().equals(Role.Medcin)) {
+        if (!doctor.getRole().equals(Role.Medecin)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Accès refusé : seuls les médecins peuvent valider les menus");
         }

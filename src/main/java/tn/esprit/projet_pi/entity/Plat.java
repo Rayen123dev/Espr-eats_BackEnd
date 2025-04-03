@@ -1,5 +1,6 @@
 package tn.esprit.projet_pi.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -16,6 +17,7 @@ public class Plat {
     private CategoriePlat categorie;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "added_by")
     private User addedBy;
 
@@ -28,6 +30,7 @@ public class Plat {
     // Enlever la sérialisation de 'menus' et les relations inutiles ici
     @ManyToMany(mappedBy = "plats")
     @JsonIgnore
+    @JsonBackReference
     private List<Menu> menus= new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.MERGE})
@@ -36,7 +39,7 @@ public class Plat {
             joinColumns = @JoinColumn(name = "plat_id"),
             inverseJoinColumns = @JoinColumn(name = "regime_id")
     )
-
+    @JsonIgnore
     private List<RegimeAlimentaire> regimes = new ArrayList<>();
     private String imagePath;
 

@@ -32,6 +32,14 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/user_del/**").permitAll()
                         .requestMatchers("/api/reclamations/**").permitAll()  // Autorisation uniquement pour les utilisateurs avec le rôle ADMIN
                         .requestMatchers("/api/abonnement/**").permitAll()
+                        .requestMatchers("/api/menus/**").permitAll()
+                        //.requestMatchers("/api/plats/**").hasRole("Staff")
+                       //.requestMatchers("/api/regimes/**").permitAll()
+                        .requestMatchers("/api/regimes/**").hasRole("Staff")
+                        .requestMatchers("/api/plats/**").permitAll()
+
+
+
                         /*.requestMatchers("/api/users/accept/{userId}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/api/users/block/{userId}").hasRole("ADMIN")
                         .requestMatchers("/api/stage/uploadFile").hasRole("ADMIN")

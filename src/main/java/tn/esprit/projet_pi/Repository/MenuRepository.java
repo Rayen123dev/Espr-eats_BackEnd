@@ -14,9 +14,13 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     boolean existsByDateAndRegime(LocalDate date, RegimeAlimentaireType regime);
 
     List<Menu> findByOrderByDateAscIdAsc();
+    List<Menu> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
-    // Find validated menus
+    // Find validated menus (fixed method name)
     List<Menu> findByIsValidatedTrue();
+
+    // Find validated menus between dates (corrected signature)
+    List<Menu> findByIsValidatedTrueAndDateBetween(LocalDate startDate, LocalDate endDate);
 
     // Find menus for upcoming week
     @Query("SELECT m FROM Menu m WHERE m.date BETWEEN ?1 AND ?2 ORDER BY m.date ASC")

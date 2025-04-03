@@ -15,8 +15,9 @@ public class RegimeAlimentaire {
 
     @Enumerated(EnumType.STRING)
     private RegimeAlimentaireType type;
-    @JsonBackReference
+
     @ManyToMany(mappedBy = "regimes", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+
     private List<Plat> platsRecommandes = new ArrayList<>();
 
     @ManyToOne

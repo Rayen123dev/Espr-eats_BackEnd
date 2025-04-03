@@ -6,14 +6,20 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import tn.esprit.projet_pi.entity.Menu;
 import tn.esprit.projet_pi.entity.Reclamation;
+import tn.esprit.projet_pi.entity.Role;
+import tn.esprit.projet_pi.entity.User;
+
+import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
-
+    private static final Logger LOGGER = Logger.getLogger(EmailService.class.getName());
     public void sendResetPasswordEmail(String toEmail, String token) {
         String resetUrl = "http://localhost:4200/reset-password?token=" + token;
 
@@ -75,6 +81,56 @@ public class EmailService {
         );
 
         sendReclamationResponse(recipientEmail, subject, message);
+    }
+    public void sendMenuValidatedNotification(List<User> users, List<Menu> validatedMenus) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            // Récupérer les emails des utilisateurs avec le rôle USER
+            String[] userEmails = users.stream()
+                    .filter(user -> user.getRole().equals(Role.User))
+                    .map(User::getEmail)
+                    .toArray(String[]::new);
+
+            if (userEmails.length == 0) {
+                LOGGER.warning("⚠️ Aucun utilisateur avec le rôle USER trouvé pour envoyer la notification.");
+                return;
+            }
+
+            helper.setTo(userEmails);
+            helper.setSubject("Menu de la semaine est pres");
+            helper.setText(buildEmailBody(validatedMenus), true); // true pour activer le HTML
+
+            mailSender.send(message);
+            LOGGER.info("✅ Email de notification envoyé à " + userEmails.length + " utilisateurs.");
+        } catch (MessagingException e) {
+            LOGGER.severe("❌ Erreur lors de l'envoi de l'email : " + e.getMessage());
+            throw new RuntimeException("Erreur lors de l'envoi de l'email", e);
+        }
+    }
+
+    private String buildEmailBody(List<Menu> validatedMenus) {
+        StringBuilder body = new StringBuilder();
+        body.append("<h2>Menu de la semaine validé</h2>");
+        body.append("<p>Bonjour,<br>Le menu de la semaine a été validé et est maintenant disponible. Voici les détails :</p>");
+        body.append("<ul>");
+
+        for (Menu menu : validatedMenus) {
+            body.append("<li>")
+                    .append(menu.getDate())
+                    .append(" - Régime : ")
+                    .append(menu.getRegime())
+                    .append(" - Calories totales : ")
+                    .append(menu.getTotalCalories())
+                    .append("</li>");
+        }
+
+        body.append("</ul>");
+        body.append("<p>Vous pouvez consulter les détails dans l'application.</p>");
+        body.append("<p>Cordialement,<br>L'équipe de gestion des menus</p>");
+
+        return body.toString();
     }
 
 
