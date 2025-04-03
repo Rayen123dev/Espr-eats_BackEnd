@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface ReclamationRepository extends JpaRepository<Reclamation, Integer> {
     Reclamation save(Reclamation reclamation);
     List<Reclamation> findAll();
-    //Reclamation findById(Long idReclamation); // Fix return type
+    Reclamation findById(Long idReclamation); // Fix return type
     Optional<Reclamation> deleteById(Long idReclamation);
     List<Reclamation> findByUser_IdUser(Long idUser);
 
