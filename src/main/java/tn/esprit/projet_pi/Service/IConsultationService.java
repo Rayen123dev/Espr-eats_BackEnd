@@ -11,4 +11,6 @@ public interface IConsultationService {
     Consultation getConsultation(Long id);
     List<Consultation> getByEtudiant(Long userId);
     List<Consultation> getByMedecin(Long medecinId);
+    List<Consultation> getAllConsultations();
+
 }

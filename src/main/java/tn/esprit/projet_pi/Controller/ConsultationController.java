@@ -52,4 +52,10 @@ public class ConsultationController {
     public List<Consultation> getByMedecin(@PathVariable Long medecinId) {
         return consultationService.getByMedecin(medecinId);
     }
+
+    @GetMapping
+    public List<Consultation> getAllConsultations() {
+        return consultationService.getAllConsultations();
+    }
+
 }

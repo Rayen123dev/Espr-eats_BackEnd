@@ -27,9 +27,21 @@ public class ProfilNutritionnelController {
 
     @PostMapping("/add")
     public ResponseEntity<ProfilNutritionnel> create(@RequestBody ProfilNutritionnel profil) {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String email = auth.getName(); // Récupère l'email de l'utilisateur
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        profil.setUser(user); // Associe le user connecté au profil
+
         ProfilNutritionnel created = profilService.addProfil(profil);
         return ResponseEntity.ok(created);
     }
+
 
     @PutMapping("/{id}")
     public ProfilNutritionnel update(@PathVariable Long id, @RequestBody ProfilNutritionnel profil) {

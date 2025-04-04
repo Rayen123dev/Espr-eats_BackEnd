@@ -29,8 +29,12 @@ public class Consultation {
     @Enumerated(EnumType.STRING)
     private StatutConsultation statut;
 
-    private String typeConsultation;
-    private String compteRendu;
+    @Enumerated(EnumType.STRING)
+    private TypeConsultation typeConsultation;
+
+    @Column(length = 1000)
+    private String message;  // ou description
+
 
     public Long getId() {
         return id;
@@ -72,19 +76,20 @@ public class Consultation {
         this.statut = statut;
     }
 
-    public String getTypeConsultation() {
+    public TypeConsultation getTypeConsultation() {
         return typeConsultation;
     }
 
-    public void setTypeConsultation(String typeConsultation) {
+    public void setTypeConsultation(TypeConsultation typeConsultation) {
         this.typeConsultation = typeConsultation;
     }
 
-    public String getCompteRendu() {
-        return compteRendu;
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public void setCompteRendu(String compteRendu) {
-        this.compteRendu = compteRendu;
-    }
+
 }

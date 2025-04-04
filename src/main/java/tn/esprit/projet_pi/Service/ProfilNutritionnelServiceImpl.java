@@ -73,6 +73,7 @@ public class ProfilNutritionnelServiceImpl implements IProfilNutritionnelService
         ancien.setAllergies(newProfil.getAllergies());
         ancien.setDerniereEvolution(newProfil.getDerniereEvolution());
         ancien.setSexe(newProfil.getSexe());
+        ancien.setFumeur(newProfil.getFumeur()); // ✅ Cette ligne est manquante
         ancien.setDerniereMiseAJour(LocalDateTime.now());
 
         calculerImcEtBesoins(ancien);

@@ -55,6 +55,15 @@ public class ProfilNutritionnel {
 
     private LocalDateTime derniereMiseAJour;
 
+    private Boolean fumeur;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Le groupe sanguin est requis")
+    private GroupeSanguin groupeSanguin;
+
+
+
+
     // --- Getters et Setters explicites (optionnels avec Lombok) ---
 
     public Long getId() {
@@ -160,4 +169,22 @@ public class ProfilNutritionnel {
     public void setDerniereMiseAJour(LocalDateTime derniereMiseAJour) {
         this.derniereMiseAJour = derniereMiseAJour;
     }
+
+    public Boolean getFumeur() {
+        return fumeur;
+    }
+
+    public void setFumeur(Boolean fumeur) {
+        this.fumeur = fumeur;
+    }
+
+    public GroupeSanguin getGroupeSanguin() {
+        return groupeSanguin;
+    }
+
+    public void setGroupeSanguin(GroupeSanguin groupeSanguin) {
+        this.groupeSanguin = groupeSanguin;
+    }
+
+
 }
