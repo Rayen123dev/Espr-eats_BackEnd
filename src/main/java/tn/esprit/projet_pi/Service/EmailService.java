@@ -13,6 +13,7 @@ import tn.esprit.projet_pi.entity.User;
 
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Service
 public class EmailService {
@@ -112,8 +113,8 @@ public class EmailService {
 
     private String buildEmailBody(List<Menu> validatedMenus) {
         StringBuilder body = new StringBuilder();
-        body.append("<h2>Menu de la semaine validé</h2>");
-        body.append("<p>Bonjour,<br>Le menu de la semaine a été validé et est maintenant disponible. Voici les détails :</p>");
+        body.append("<h2>Menu de la semaine Près </h2>");
+        body.append("<p>Bonjour,<br>Le menu de la semaine a été près et est maintenant disponible. Voici les détails :</p>");
         body.append("<ul>");
 
         for (Menu menu : validatedMenus) {
@@ -132,6 +133,60 @@ public class EmailService {
 
         return body.toString();
     }
+    public void sendMenuRejectionNotification(List<User> staffUsers, List<Menu> rejectedMenus, String rejectionReason) {
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        // Collecter les emails des membres du staff
+        String[] staffEmails = staffUsers.stream()
+                .map(User::getEmail)
+                .toArray(String[]::new);
+
+        message.setTo(staffEmails);
+        message.setSubject("Notification de rejet de menus");
+
+        // Construire le corps de l'email
+        StringBuilder emailBody = new StringBuilder();
+        emailBody.append("Les menus suivants ont été rejetés :\n\n");
+        for (Menu menu : rejectedMenus) {
+            emailBody.append("Menu ID: ").append(menu.getId())
+                    .append(" - Date: ").append(menu.getDate())
+                    .append("\n");
+        }
+        emailBody.append("\nRaison du rejet : ").append(rejectionReason).append("\n");
+        emailBody.append("\nVeuillez prendre les mesures nécessaires pour regénérer un autre .");
+
+        message.setText(emailBody.toString());
+
+        try {
+            mailSender.send(message);
+            LOGGER.info("📧 Email de notification de rejet envoyé à " + staffEmails.length + " membres du staff");
+        } catch (Exception e) {
+            LOGGER.severe("❌ Erreur lors de l'envoi de l'email de rejet : " + e.getMessage());
+        }
+    }
+
+    private String buildRejectionEmailBody(List<Menu> rejectedMenus, String reason) {
+        StringBuilder body = new StringBuilder();
+        body.append("<h2>Rejet de menus</h2>");
+        body.append("<p>Bonjour,<br>Certains menus ont été rejetés par le médecin. Voici les détails :</p>");
+        body.append("<ul>");
+
+        for (Menu menu : rejectedMenus) {
+            body.append("<li>")
+                    .append(menu.getDate())
+                    .append(" - Régime : ")
+                    .append(menu.getRegime())
+                    .append("</li>");
+        }
+
+        body.append("</ul>");
+        body.append("<p><strong>Raison du rejet :</strong> ").append(reason).append("</p>");
+        body.append("<p>Merci de bien vouloir corriger ces menus et les soumettre à nouveau.</p>");
+        body.append("<p>Cordialement,<br>L'équipe de gestion des menus</p>");
+
+        return body.toString();
+    }
+
 
 
 

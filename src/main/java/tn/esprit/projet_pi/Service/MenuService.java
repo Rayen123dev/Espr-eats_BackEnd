@@ -20,5 +20,5 @@ public interface MenuService {
     // Method to schedule automatic menu generation
     void scheduleMenuGeneration();
     public List<RegimeAlimentaire> returnregime ();
-
+    public void rejectMenus(Long doctorId, List<Long> menuIds, String rejectionReason);
 }

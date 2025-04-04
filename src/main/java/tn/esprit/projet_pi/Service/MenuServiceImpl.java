@@ -197,6 +197,39 @@ public class MenuServiceImpl implements MenuService {
             LOGGER.info("ℹ️ Notification email non envoyée - tous les menus de la semaine ne sont pas encore validés");
         }
     }
+    @Override
+    @Transactional
+    public void rejectMenus(Long doctorId, List<Long> menuIds, String rejectionReason) {
+        User doctor = userRepository.findByidUser(doctorId)
+                .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
+
+        if (!doctor.getRole().equals(Role.Medecin)) {
+            throw new RuntimeException("Seuls les médecins peuvent rejeter les menus");
+        }
+
+        List<Menu> menusToReject = menuRepository.findAllById(menuIds);
+        if (menusToReject.isEmpty()) {
+            LOGGER.warning("⚠️ Aucun menu trouvé pour les IDs fournis");
+            return;
+        }
+
+        menusToReject.forEach(menu -> {
+            if (menu.getIsValidated()) {
+                LOGGER.warning("⚠️ Le menu ID " + menu.getId() + " est déjà validé et ne peut pas être rejeté");
+                throw new RuntimeException("Le menu ID " + menu.getId() + " est déjà validé");
+            }
+
+            menu.setIsValidated(false);
+            menu.setValidatedBy(null);
+        });
+
+        menuRepository.saveAll(menusToReject);
+        LOGGER.info("❌ " + menusToReject.size() + " menus rejetés par le médecin ID: " + doctorId);
+
+        List<User> staffUsers = userRepository.findByRole(Role.Staff);
+        emailService.sendMenuRejectionNotification(staffUsers, menusToReject, rejectionReason);
+    }
+
 
     @Override
     @Transactional

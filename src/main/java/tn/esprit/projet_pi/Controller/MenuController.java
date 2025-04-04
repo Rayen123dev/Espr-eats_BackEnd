@@ -12,6 +12,7 @@ import tn.esprit.projet_pi.entity.Role;
 import tn.esprit.projet_pi.entity.User;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/menus")
@@ -86,6 +87,41 @@ public class MenuController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Erreur lors de la validation des menus: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reject")
+    public ResponseEntity<?> rejectMenus(@RequestParam Long doctorId,
+                                         @RequestBody Map<String, Object> requestBody) {
+        User doctor = userRepository.findByidUser(doctorId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+
+        if (!doctor.getRole().equals(Role.Medecin)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Accès refusé : seuls les médecins peuvent rejeter les menus");
+        }
+
+        try {
+            List<Long> menuIds = (List<Long>) requestBody.get("menuIds");
+            String rejectionReason = (String) requestBody.get("rejectionReason");
+
+            if (menuIds == null || menuIds.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La liste des IDs de menus est requise");
+            }
+            if (rejectionReason == null || rejectionReason.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("La raison du rejet est requise");
+            }
+
+            menuService.rejectMenus(doctorId, menuIds, rejectionReason);
+            return ResponseEntity.ok("Menus rejetés avec succès !");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Erreur lors du rejet des menus: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur inattendue lors du rejet des menus: " + e.getMessage());
         }
     }
 
