@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -26,12 +27,18 @@ public class HistoriqueProfilNutritionnel {
     @Enumerated(EnumType.STRING)
     private NiveauActivite niveauActivite;
 
-    private String objectif;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "historique_objectifs", joinColumns = @JoinColumn(name = "historique_id"))
+    @Column(name = "objectif")
+    private Set<ObjectifType> objectif;
+
     private Double imc;
     private Integer besoinCalorique;
 
-
     private String commentaire;
+
+    // 👇 Getters et setters explicites (optionnels avec Lombok, mais gardés ici pour clarté)
 
     public Long getId() {
         return id;
@@ -73,11 +80,10 @@ public class HistoriqueProfilNutritionnel {
         this.niveauActivite = niveauActivite;
     }
 
-    public String getObjectif() {
+    public Set<ObjectifType> getObjectif() {
         return objectif;
     }
-
-    public void setObjectif(String objectif) {
+    public void setObjectif(Set<ObjectifType> objectif) {
         this.objectif = objectif;
     }
 

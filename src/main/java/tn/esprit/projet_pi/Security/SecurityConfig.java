@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/consultations/**").authenticated()                       .requestMatchers("/api/recommandations/**").permitAll()
                         .requestMatchers("/api/validation-menu/**").permitAll()
                         .requestMatchers("/api/medcin/**").permitAll()
+                        .requestMatchers("/api/enums/**").permitAll()
 
                         /*.requestMatchers("/api/users/accept/{userId}").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/api/users/block/{userId}").hasRole("ADMIN")

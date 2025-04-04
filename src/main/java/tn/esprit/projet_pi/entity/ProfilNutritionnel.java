@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -37,11 +38,18 @@ public class ProfilNutritionnel {
     @NotNull(message = "Le niveau d'activité est requis")
     private NiveauActivite niveauActivite;
 
-    @NotBlank(message = "L'objectif est requis")
-    @Size(min = 3, max = 100, message = "L'objectif doit contenir entre 3 et 100 caractères")
-    private String objectif;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "profil_objectifs", joinColumns = @JoinColumn(name = "profil_id"))
+    @Column(name = "objectif")
+    private Set<ObjectifType> objectif;
 
-    private String allergies;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "profil_allergies", joinColumns = @JoinColumn(name = "profil_id"))
+    @Column(name = "allergie")
+    private Set<AllergieType> allergies;
+
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Le régime alimentaire est requis")
@@ -106,13 +114,6 @@ public class ProfilNutritionnel {
         this.taille = taille;
     }
 
-    public String getObjectif() {
-        return objectif;
-    }
-
-    public void setObjectif(String objectif) {
-        this.objectif = objectif;
-    }
 
     public NiveauActivite getNiveauActivite() {
         return niveauActivite;
@@ -122,13 +123,6 @@ public class ProfilNutritionnel {
         this.niveauActivite = niveauActivite;
     }
 
-    public String getAllergies() {
-        return allergies;
-    }
-
-    public void setAllergies(String allergies) {
-        this.allergies = allergies;
-    }
 
     public RegimeAlimentaireType getRegimeAlimentaire() {
         return regimeAlimentaire;
@@ -186,5 +180,17 @@ public class ProfilNutritionnel {
         this.groupeSanguin = groupeSanguin;
     }
 
+    public Set<ObjectifType> getObjectif() {
+        return objectif;
+    }
+    public void setObjectif(Set<ObjectifType> objectif) {
+        this.objectif = objectif;
+    }
+    public Set<AllergieType> getAllergies() {
+        return allergies;
+    }
+    public void setAllergies(Set<AllergieType> allergies) {
+        this.allergies = allergies;
+    }
 
 }

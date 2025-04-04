@@ -8,6 +8,7 @@ import tn.esprit.projet_pi.entity.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ProfilNutritionnelServiceImpl implements IProfilNutritionnelService {
@@ -36,8 +37,8 @@ public class ProfilNutritionnelServiceImpl implements IProfilNutritionnelService
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
         profil.setUser(user);
-
         calculerImcEtBesoins(profil);
+        profil.setDerniereMiseAJour(LocalDateTime.now());
 
         return profilNutritionnelRepository.save(profil);
     }
@@ -51,20 +52,27 @@ public class ProfilNutritionnelServiceImpl implements IProfilNutritionnelService
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
+        // ✅ Sauvegarde de l'historique sans shared reference
         HistoriqueProfilNutritionnel historique = new HistoriqueProfilNutritionnel();
         historique.setProfil(ancien);
         historique.setDateEnregistrement(LocalDateTime.now());
         historique.setPoids(ancien.getPoidsActuel());
         historique.setNiveauActivite(ancien.getNiveauActivite());
-        historique.setObjectif(ancien.getObjectif());
+
+        // ✅ Cloner la liste d’objectifs pour éviter les références croisées
+        if (ancien.getObjectif() != null) {
+            historique.setObjectif(Set.copyOf(ancien.getObjectif()));
+        }
+
         historique.setImc(ancien.getImc());
         historique.setBesoinCalorique(ancien.getBesoinCalorique());
-
         historique.setCommentaire(user.getRole() == Role.Medcin ?
                 "Mise à jour effectuée par le médecin." :
                 "Mise à jour effectuée par l'étudiant.");
+
         historiqueService.save(historique);
 
+        // ✅ Mise à jour du profil
         ancien.setTaille(newProfil.getTaille());
         ancien.setPoidsActuel(newProfil.getPoidsActuel());
         ancien.setNiveauActivite(newProfil.getNiveauActivite());
@@ -73,13 +81,15 @@ public class ProfilNutritionnelServiceImpl implements IProfilNutritionnelService
         ancien.setAllergies(newProfil.getAllergies());
         ancien.setDerniereEvolution(newProfil.getDerniereEvolution());
         ancien.setSexe(newProfil.getSexe());
-        ancien.setFumeur(newProfil.getFumeur()); // ✅ Cette ligne est manquante
+        ancien.setFumeur(newProfil.getFumeur());
+        ancien.setGroupeSanguin(newProfil.getGroupeSanguin());
         ancien.setDerniereMiseAJour(LocalDateTime.now());
 
         calculerImcEtBesoins(ancien);
 
         return profilNutritionnelRepository.save(ancien);
     }
+
 
     private void calculerImcEtBesoins(ProfilNutritionnel profil) {
         Double poids = profil.getPoidsActuel();
