@@ -35,7 +35,7 @@ public class AbonnementService implements IAbonnement {
 
     @Override
     @Transactional
-    public Abonnement createAbonnementByUser(Abonnement abonnement, Long userId) {
+    public Abonnement createAbonnementByUser(Abonnement abonnement, Long userId, String checkoutUrl) {
         User user = userRepo.findByidUser(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + userId));
 
@@ -48,19 +48,20 @@ public class AbonnementService implements IAbonnement {
         abonnement.setDateDebut(dateDebut);
         abonnement.setAbonnementStatus(AbonnementStatus.PENDING);
         abonnement.setCout(calculateCout(abonnement.getTypeAbonnement()));
-
         abonnement.setConfirmed(abonnement.getConfirmed());
         abonnement.setBlocked(abonnement.getBlocked());
 
-        // Calculate the end date based on the type of subscriptionP
+        // Calculate the end date based on the type of subscription
         LocalDate dateFin = calculateDateFin(dateDebut, abonnement.getTypeAbonnement());
         abonnement.setDateFin(dateFin);
-
         abonnement.setRemainingDays(abonnement.calculateRemainingDays());
 
         abonnement.setUser(user);
         user.setAbonnement(abonnement);
         Abonnement newAbonnement = abonnementRepository.save(abonnement);
+
+        // Send email with Stripe Checkout URL instead of confirmation email
+        //emailService.sendStripeUrl(user, checkoutUrl);
         emailService.sendConfirmationEmail(user, newAbonnement);
 
         // Create and save the transaction for this abonnement
@@ -70,9 +71,9 @@ public class AbonnementService implements IAbonnement {
         transaction.setMontant(abonnement.getCout());
         transaction.setDateTransaction(LocalDateTime.now().withNano(0));
         transaction.setReferencePaiement("REF-" + newAbonnement.getIdAbonnement());
-        transaction.setDetails("Transaction liée à l'abonnement de l'utilisateur" + abonnement.getTypeAbonnement() + " et montant: " + abonnement.getCout());
-
+        transaction.setDetails("Transaction liée à l'abonnement de l'utilisateur " + abonnement.getTypeAbonnement() + " et montant: " + abonnement.getCout());
         transactionService.createTransaction(transaction);
+
         return newAbonnement;
     }
 
@@ -272,6 +273,11 @@ public class AbonnementService implements IAbonnement {
     //get all abonnements by status
     public List<Abonnement> getAllAbonnementsByStatus(AbonnementStatus abonnementStatus) {
         return abonnementRepository.findAllByAbonnementStatus(abonnementStatus);
+    }
+
+    public Abonnement getAbonnementByStripeSessionId(String stripeSessionId) {
+        return abonnementRepository.findByStripeSessionId(stripeSessionId)
+                .orElseThrow(() -> new RuntimeException("Abonnement not found for session ID: " + stripeSessionId));
     }
 
 }

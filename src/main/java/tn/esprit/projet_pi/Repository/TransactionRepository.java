@@ -13,4 +13,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByStatus(TransactionStatus status);
 
     List<Transaction> findByAbonnement(Abonnement abonnement);
+
+
+
 }

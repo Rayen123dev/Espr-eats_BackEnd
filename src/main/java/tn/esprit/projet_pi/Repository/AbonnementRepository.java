@@ -30,4 +30,6 @@ public interface AbonnementRepository  extends JpaRepository<Abonnement, Long> {
     List<Abonnement> findAllByTypeAbonnement(TypeAbonnement typeAbonnement);
 
     List<Abonnement> findAllByAbonnementStatus(AbonnementStatus abonnementStatus);
+
+    Optional<Abonnement> findByStripeSessionId(String stripeSessionId);
 }

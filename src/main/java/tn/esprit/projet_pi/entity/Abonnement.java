@@ -26,6 +26,7 @@ public class Abonnement {
     private LocalDate dateFin;
     private Double cout;
     private long remainingDays;
+    private String stripeSessionId;
 
 
     @Column(unique = true)
@@ -182,5 +183,12 @@ public class Abonnement {
 
     public long getRemainingDays() {
         return remainingDays;
+    }
+
+    public String getStripeSessionId() {
+        return stripeSessionId;
+    }
+    public void setStripeSessionId(String stripeSessionId) {
+        this.stripeSessionId = stripeSessionId;
     }
 }

@@ -100,4 +100,10 @@ public class TransactionService implements ITransaction {
 
         return transactionRepository.findByDateTransactionBetween(start, end);
     }
+
+    @Override
+    public List<Transaction> getTransactionByAbonnementId(Long AbonnementId){
+        return transactionRepository.findAll();
+    }
+
 }
