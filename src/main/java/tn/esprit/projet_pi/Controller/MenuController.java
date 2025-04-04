@@ -108,4 +108,14 @@ public class MenuController {
                     .body("Erreur lors de la régénération des menus: " + e.getMessage());
         }
     }
+    @PostMapping("/trigger-schedule")
+    public ResponseEntity<String> triggerScheduledTask() {
+        try {
+            menuService.scheduleMenuGeneration();
+            return ResponseEntity.ok("Génération planifiée des menus exécutée !");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de l'exécution : " + e.getMessage());
+        }
+    }
 }

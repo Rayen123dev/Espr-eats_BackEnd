@@ -252,7 +252,7 @@ public class MenuServiceImpl implements MenuService {
             }
         }
     }
-
+//"0 * * * * *"
     @Override
     @Scheduled(cron = "0 0 0 * * FRI")
     public void scheduleMenuGeneration() {
