@@ -2,6 +2,7 @@ package tn.esprit.projet_pi.Controller;
 
 import jakarta.persistence.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Log.LoginRequest;
 import tn.esprit.projet_pi.Log.RegisterRequest;
 import tn.esprit.projet_pi.Repository.UserRepo;
+import tn.esprit.projet_pi.Service.CaptchaService;
 import tn.esprit.projet_pi.Service.CloudinaryService;
 import tn.esprit.projet_pi.Service.EmailService;
 import tn.esprit.projet_pi.Service.UserService;
@@ -29,14 +31,16 @@ public class AuthController {
     private final UserRepo userRepo;
     private final JwtService jwtService;
     private final CloudinaryService cloudinaryService;
+    private final CaptchaService captchaService;
 
 
-    public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService, CloudinaryService cloudinaryService) {
+    public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService, CloudinaryService cloudinaryService, CaptchaService captchaService) {
         this.userService = userService;
         this.emailService = emailService;
         this.userRepo = userRepo;
         this.jwtService = jwtService;
         this.cloudinaryService = cloudinaryService;
+        this.captchaService = captchaService;
     }
     @PostMapping("/upload-image")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
@@ -71,7 +75,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> signin(@RequestBody LoginRequest loginRequest) {
         String token = String.valueOf(userService.login(loginRequest.getEmail(), loginRequest.getMdp()));
+        boolean captchaVerified = captchaService.verifyCaptcha(loginRequest.getCaptchaToken());
 
+        if (!captchaVerified) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("CAPTCHA verification failed.");
+        }
         // Renvoyer le token dans une réponse JSON
         return ResponseEntity.ok(Collections.singletonMap("token", token)); // Utilisation d'une map pour inclure le token dans une structure JSON
     }
