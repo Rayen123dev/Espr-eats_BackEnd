@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Log.LoginRequest;
 import tn.esprit.projet_pi.Log.RegisterRequest;
 import tn.esprit.projet_pi.Repository.UserRepo;
+import tn.esprit.projet_pi.Service.CloudinaryService;
 import tn.esprit.projet_pi.Service.EmailService;
 import tn.esprit.projet_pi.Service.UserService;
 import tn.esprit.projet_pi.entity.ForgotPasswordRequest;
@@ -26,15 +28,27 @@ public class AuthController {
     private final EmailService emailService;
     private final UserRepo userRepo;
     private final JwtService jwtService;
+    private final CloudinaryService cloudinaryService;
 
-    public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService) {
+
+    public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService, CloudinaryService cloudinaryService) {
         this.userService = userService;
         this.emailService = emailService;
         this.userRepo = userRepo;
         this.jwtService = jwtService;
+        this.cloudinaryService = cloudinaryService;
+    }
+    @PostMapping("/upload-image")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = cloudinaryService.uploadImage(file);
+            return ResponseEntity.ok(Collections.singletonMap("imageUrl", imageUrl));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Image upload failed: " + e.getMessage());
+        }
     }
 
-    @PostMapping("/signup")
+    @PostMapping(value = "/signup", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> signup(@RequestBody RegisterRequest request) {
         User user = new User();
         user.setNom(request.getNom());
