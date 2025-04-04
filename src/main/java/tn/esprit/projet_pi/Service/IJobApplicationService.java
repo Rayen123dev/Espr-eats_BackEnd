@@ -7,7 +7,8 @@ import java.util.Optional;
 
 public interface IJobApplicationService {
     JobApplication addNewJapplication(JobApplication reclamation);
-    List<JobApplication> findAllJoffer();
-    JobApplication findByIdJoffer(Long idJobApplication);
+    List<JobApplication> findAllJapplication();
+    JobApplication findByIdJapplication(Long idJobApplication);
     void deleteById(Long idJobApplication);
+    JobApplication ModifyJapplication(JobApplication reclamation);
 }
