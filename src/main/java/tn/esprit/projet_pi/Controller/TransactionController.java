@@ -56,5 +56,13 @@ public class TransactionController {
         return transactionService.getTransactionsByDateRange(startDate, endDate);
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping("/allAbonnement/{userId}/{abonnementId}")
+    public List<Transaction> getTransactionsByAbonnement(
+            @PathVariable Long userId,
+            @PathVariable Long abonnementId) {
+        return transactionService.getTransactionsByAbonnementId(userId, abonnementId);
+    }
+
 
 }

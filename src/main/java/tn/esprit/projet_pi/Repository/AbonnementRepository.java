@@ -32,4 +32,7 @@ public interface AbonnementRepository  extends JpaRepository<Abonnement, Long> {
     List<Abonnement> findAllByAbonnementStatus(AbonnementStatus abonnementStatus);
 
     Optional<Abonnement> findByStripeSessionId(String stripeSessionId);
+
+    @Query("SELECT a.typeAbonnement, COUNT(a) FROM Abonnement a GROUP BY a.typeAbonnement")
+    List<Object[]> countSubscriptionsByType();
 }

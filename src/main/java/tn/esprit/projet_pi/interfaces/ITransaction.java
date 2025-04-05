@@ -11,6 +11,6 @@ public interface ITransaction {
     public Transaction getTransactionById(Long transactionId);
     public List<Transaction> getTransactionsByType(String transactionType);
     public List<Transaction> getTransactionsByDateRange(String startDate, String endDate);
+    public List<Transaction> getTransactionsByAbonnementId(Long userId, Long abonnementId);
 
-    public List<Transaction> getTransactionByAbonnementId(Long AbonnementId);
 }

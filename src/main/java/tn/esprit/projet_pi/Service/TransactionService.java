@@ -2,8 +2,10 @@ package tn.esprit.projet_pi.Service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import tn.esprit.projet_pi.Repository.TransactionRepository;
+import tn.esprit.projet_pi.entity.Abonnement;
 import tn.esprit.projet_pi.entity.Transaction;
 import tn.esprit.projet_pi.entity.TransactionStatus;
 import tn.esprit.projet_pi.interfaces.ITransaction;
@@ -16,6 +18,10 @@ import java.util.Optional;
 public class TransactionService implements ITransaction {
 
     private final TransactionRepository transactionRepository;
+
+    @Autowired
+    @Lazy
+    private AbonnementService abonnementService;
 
     @Autowired
     public TransactionService(TransactionRepository transactionRepository) {
@@ -102,8 +108,14 @@ public class TransactionService implements ITransaction {
     }
 
     @Override
-    public List<Transaction> getTransactionByAbonnementId(Long AbonnementId){
-        return transactionRepository.findAll();
+    public List<Transaction> getTransactionsByAbonnementId(Long userId, Long abonnementId) {
+        Abonnement abonnement = abonnementService.getAbonnementById(userId, abonnementId);
+        if (abonnement == null) {
+            throw new RuntimeException("Abonnement not found or does not belong to this user.");
+        }
+        System.out.println("Found abonnement: " + abonnement);  // Log the abonnement details
+        return transactionRepository.findByAbonnement(abonnement);
     }
+
 
 }

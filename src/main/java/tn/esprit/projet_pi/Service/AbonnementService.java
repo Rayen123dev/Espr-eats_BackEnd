@@ -71,7 +71,7 @@ public class AbonnementService implements IAbonnement {
         transaction.setMontant(abonnement.getCout());
         transaction.setDateTransaction(LocalDateTime.now().withNano(0));
         transaction.setReferencePaiement("REF-" + newAbonnement.getIdAbonnement());
-        transaction.setDetails("Transaction liée à l'abonnement de l'utilisateur " + abonnement.getTypeAbonnement() + " et montant: " + abonnement.getCout());
+        transaction.setDetails("Abonnement est en attente");
         transactionService.createTransaction(transaction);
 
         return newAbonnement;
@@ -216,7 +216,7 @@ public class AbonnementService implements IAbonnement {
         transaction.setDateTransaction(LocalDateTime.now());
         transaction.setMontant(abonnement.getCout());
         transaction.setReferencePaiement("REF-" + abonnement.getIdAbonnement());
-        transaction.setDetails("Abonnement confirmé et actif pour l'utilisateur " + abonnement.getUser().getNom());
+        transaction.setDetails("Abonnement confirmé et actif");
         transactionRepository.save(transaction);
 
         return abonnement;
@@ -278,6 +278,29 @@ public class AbonnementService implements IAbonnement {
     public Abonnement getAbonnementByStripeSessionId(String stripeSessionId) {
         return abonnementRepository.findByStripeSessionId(stripeSessionId)
                 .orElseThrow(() -> new RuntimeException("Abonnement not found for session ID: " + stripeSessionId));
+    }
+
+    public TypeAbonnement getRecommendedSubscriptionType() {
+        List<Object[]> typeCounts = abonnementRepository.countSubscriptionsByType();
+        if (typeCounts.isEmpty()) {
+            // Default to MENSUEL if no subscriptions exist
+            return TypeAbonnement.MENSUEL;
+        }
+
+        TypeAbonnement recommendedType = null;
+        long maxCount = 0;
+
+        for (Object[] typeCount : typeCounts) {
+            TypeAbonnement type = (TypeAbonnement) typeCount[0];
+            Long count = (Long) typeCount[1];
+            if (count > maxCount) {
+                maxCount = count;
+                recommendedType = type;
+            }
+        }
+
+        // If no type is found (unlikely), default to MENSUEL
+        return recommendedType != null ? recommendedType : TypeAbonnement.MENSUEL;
     }
 
 }

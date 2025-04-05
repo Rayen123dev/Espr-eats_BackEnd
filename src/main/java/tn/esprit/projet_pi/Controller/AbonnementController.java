@@ -190,4 +190,9 @@ public class AbonnementController {
             return new ResponseEntity<>("Webhook error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @GetMapping("/recommended-type")
+    public ResponseEntity<String> getRecommendedSubscriptionType() {
+        TypeAbonnement recommendedType = abonnementService.getRecommendedSubscriptionType();
+        return ResponseEntity.ok(recommendedType.toString());
+    }
 }
