@@ -154,4 +154,5 @@ public class MenuController {
                     .body("Erreur lors de l'exécution : " + e.getMessage());
         }
     }
+
 }

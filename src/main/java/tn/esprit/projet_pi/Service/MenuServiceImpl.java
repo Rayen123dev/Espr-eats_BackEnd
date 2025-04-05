@@ -1,6 +1,7 @@
 package tn.esprit.projet_pi.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,13 @@ public class MenuServiceImpl implements MenuService {
     private final UserRepo userRepository;
     private final RegimeAlimentaireRepository regimeAlimentaireRepository;
     private final EmailService emailService;
+    // Configuration pour Google Calendar (similaire à Cloudinary)
+    @Value("${google.calendar.api-key}") // Ajoutez votre clé API dans application.properties
+    private String apiKey;
+
+    @Value("${google.calendar.id}") // ID du calendrier, par exemple "primary"
+    private String calendarId;
+
 
     @Autowired
     public MenuServiceImpl(
@@ -303,6 +311,7 @@ public class MenuServiceImpl implements MenuService {
             throw e;
         }
     }
+
 
     @Override
     public List<RegimeAlimentaire> returnregime() {

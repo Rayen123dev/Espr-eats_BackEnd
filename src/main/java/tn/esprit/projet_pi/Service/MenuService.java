@@ -1,8 +1,10 @@
 package tn.esprit.projet_pi.Service;
 
+
 import tn.esprit.projet_pi.entity.Menu;
 import tn.esprit.projet_pi.entity.RegimeAlimentaire;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface MenuService {
@@ -21,4 +23,5 @@ public interface MenuService {
     void scheduleMenuGeneration();
     public List<RegimeAlimentaire> returnregime ();
     public void rejectMenus(Long doctorId, List<Long> menuIds, String rejectionReason);
+
 }
