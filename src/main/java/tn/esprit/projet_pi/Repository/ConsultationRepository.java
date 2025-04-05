@@ -8,4 +8,8 @@ import java.util.List;
 public interface ConsultationRepository extends JpaRepository<Consultation, Long> {
     List<Consultation> findByEtudiant_IdUser(Long userId);
     List<Consultation> findByMedecin_IdUser(Long medecinId);
+
+
+
+
 }

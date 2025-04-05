@@ -9,4 +9,7 @@ public interface RecommandationNutritionnelleRepository extends JpaRepository<Re
     List<RecommandationNutritionnelle> findByConsultationId(Long consultationId);
     List<RecommandationNutritionnelle> findByMedecin_IdUser(Long medecinId);
 
+    long countByMedecinIdUser(Long idUser);
+
+
 }

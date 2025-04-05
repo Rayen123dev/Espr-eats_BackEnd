@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import tn.esprit.projet_pi.entity.ProfilNutritionnel;
 
 public interface ProfilNutritionnelRepository extends JpaRepository<ProfilNutritionnel, Long> {
-    ProfilNutritionnel findByUser_IdUser(Long userId);
+    ProfilNutritionnel findByUser_IdUser(Long idUser); // ✅ reflète exactement le champ
 }

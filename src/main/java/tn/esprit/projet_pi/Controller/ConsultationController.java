@@ -3,9 +3,12 @@ package tn.esprit.projet_pi.Controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.projet_pi.Repository.UserRepo;
 import tn.esprit.projet_pi.Service.IConsultationService;
 import tn.esprit.projet_pi.entity.Consultation;
+import tn.esprit.projet_pi.entity.User;
 
 import java.util.List;
 
@@ -14,11 +17,14 @@ import java.util.List;
 public class ConsultationController {
 
     private final IConsultationService consultationService;
+    private final UserRepo userRepo;
+
 
 
     @Autowired
-    public ConsultationController(IConsultationService consultationService) {
+    public ConsultationController(IConsultationService consultationService, UserRepo userRepo) {
         this.consultationService = consultationService;
+        this.userRepo = userRepo;
     }
 
     @PostMapping
@@ -57,5 +63,15 @@ public class ConsultationController {
     public List<Consultation> getAllConsultations() {
         return consultationService.getAllConsultations();
     }
+
+    @GetMapping("/mes-consultations")
+    public List<Consultation> getMesConsultations() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepo.findByEmail(email).orElseThrow();
+        return consultationService.getByEtudiant(user.getIdUser());
+    }
+
+
+
 
 }
