@@ -24,4 +24,37 @@ public class JobApplication {
     @ManyToOne
     @JoinColumn(name = "jobOfferId")
     private JobOffer jobOffer;
+
+
+    public Integer getJobAppID() {
+        return jobAppID;
+    }
+
+    public void setJobAppID(Integer jobAppID) {
+        this.jobAppID = jobAppID;
+    }
+
+    public String getMotivation_letter() {
+        return motivation_letter;
+    }
+
+    public void setMotivation_letter(String motivation_letter) {
+        this.motivation_letter = motivation_letter;
+    }
+
+    public String getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(String attachment) {
+        this.attachment = attachment;
+    }
+
+    public JobOffer getJobOffer() {
+        return jobOffer;
+    }
+
+    public void setJobOffer(JobOffer jobOffer) {
+        this.jobOffer = jobOffer;
+    }
 }
