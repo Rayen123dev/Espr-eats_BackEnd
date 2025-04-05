@@ -48,9 +48,16 @@ public class ReclamationService {
         return reclamationRepository.findByUser_IdUser(userId);
     }
 
+    public Reclamation getReclamationById(Long reclamationId) {
+        return reclamationRepository.findById(reclamationId);
+    }
+
     @Transactional
     public void deleteReclamation(Long id) {
         reclamationRepository.deleteById(id);
     }
 
+    public void saveReclamation(Reclamation r) {
+        reclamationRepository.save(r);
+    }
 }
