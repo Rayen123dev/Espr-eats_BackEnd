@@ -21,8 +21,12 @@ public interface AbonnementRepository  extends JpaRepository<Abonnement, Long> {
     @Query("SELECT COUNT(a) FROM Abonnement a WHERE a.abonnementStatus = 'EXPIRED'")
     long countExpiredSubscriptions();
 
-    @Query("SELECT SUM(a.cout) FROM Abonnement a WHERE a.abonnementStatus = 'ACTIVE'")
+    @Query("SELECT SUM(a.cout) FROM Abonnement a")
     Double calculateTotalRevenue();
+
+    //count blocked subscriptions
+    @Query("SELECT COUNT(a) FROM Abonnement a WHERE a.abonnementStatus = 'SUSPENDED'")
+    long countBlockedSubscriptions();
 
     @Query("SELECT FUNCTION('MONTH', a.dateDebut) as month, COUNT(a) FROM Abonnement a GROUP BY month")
     List<Object[]> countMonthlySubscriptions();
@@ -35,4 +39,5 @@ public interface AbonnementRepository  extends JpaRepository<Abonnement, Long> {
 
     @Query("SELECT a.typeAbonnement, COUNT(a) FROM Abonnement a GROUP BY a.typeAbonnement")
     List<Object[]> countSubscriptionsByType();
+
 }

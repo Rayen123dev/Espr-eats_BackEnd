@@ -91,7 +91,6 @@ public class AbonnementService implements IAbonnement {
         if (!abonnement.getUser().getId_user().equals(userId)) {
             throw new RuntimeException("Abonnement does not belong to user with ID: " + userId);
         }
-
         // Fetch and delete all associated transactions
         List<Transaction> transactions = transactionRepository.findByAbonnement(abonnement);
         if (!transactions.isEmpty()) {
@@ -181,6 +180,8 @@ public class AbonnementService implements IAbonnement {
                 .orElseThrow(() -> new RuntimeException("Abonnement not found with ID: " + abonnementId));
 
         if (abonnement.getBlocked()) {
+            abonnement.setAbonnementStatus(AbonnementStatus.SUSPENDED); // Assuming status is a String; adjust if using an enum
+            abonnementRepository.save(abonnement);
             throw new RuntimeException("Abonnement is blocked. No further actions can be performed.");
         }
     }
@@ -241,12 +242,27 @@ public class AbonnementService implements IAbonnement {
     //reports and statistics on subscriptions
     public Map<String, Object> getSubscriptionReport() {
         Map<String, Object> report = new HashMap<>();
+
+        // Count subscriptions by specific statuses
         report.put("activeSubscriptions", abonnementRepository.countActiveSubscriptions());
         report.put("pendingSubscriptions", abonnementRepository.countPendingSubscriptions());
         report.put("expiredSubscriptions", abonnementRepository.countExpiredSubscriptions());
+        report.put("blockedSubscriptions", abonnementRepository.countBlockedSubscriptions()); // Already separate
+
+        // Total revenue should include all subscriptions, regardless of status (except perhaps CANCELED)
         report.put("totalRevenue", abonnementRepository.calculateTotalRevenue());
 
-        // Monthly Growth
+        // Subscriptions by type (should include all types, regardless of status)
+        List<Object[]> abonnementsByType = abonnementRepository.countSubscriptionsByType();
+        Map<String, Long> typeData = new HashMap<>();
+        for (Object[] result : abonnementsByType) {
+            TypeAbonnement type = (TypeAbonnement) result[0];
+            Long count = (Long) result[1];
+            typeData.put(type.name(), count);
+        }
+        report.put("les abonnements", typeData);
+
+        // Monthly growth (should include all new subscriptions, regardless of current status)
         List<Object[]> monthlyGrowth = abonnementRepository.countMonthlySubscriptions();
         Map<String, Long> monthlyData = new HashMap<>();
         for (Object[] result : monthlyGrowth) {
@@ -304,5 +320,3 @@ public class AbonnementService implements IAbonnement {
     }
 
 }
-
-//TODO : nbre tentiative , ken suspect sta3ml l code akther men 3 fois , l compte mte3u yetbloka pour une durée de 24h
