@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.projet_pi.Repository.UserRepo;
 import tn.esprit.projet_pi.Service.AbonnementService;
@@ -194,5 +195,15 @@ public class AbonnementController {
     public ResponseEntity<String> getRecommendedSubscriptionType() {
         TypeAbonnement recommendedType = abonnementService.getRecommendedSubscriptionType();
         return ResponseEntity.ok(recommendedType.toString());
+    }
+
+    @PutMapping("/{idAbonnement}/unblock")
+    public ResponseEntity<Abonnement> unblockAbonnement(@PathVariable Long idAbonnement) {
+        try {
+            Abonnement abonnement = abonnementService.unblockAbonnement(idAbonnement);
+            return new ResponseEntity<>(abonnement, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 }

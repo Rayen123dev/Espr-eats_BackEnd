@@ -319,4 +319,18 @@ public class AbonnementService implements IAbonnement {
         return recommendedType != null ? recommendedType : TypeAbonnement.MENSUEL;
     }
 
+    public Abonnement unblockAbonnement(Long abonnementId) {
+        Abonnement abonnement = abonnementRepository.findById(abonnementId)
+                .orElseThrow(() -> new RuntimeException("Abonnement not found with ID: " + abonnementId));
+        if (!abonnement.getBlocked()) {
+            throw new RuntimeException("Abonnement is not blocked.");
+        }
+        if (abonnement.getUser().getRole() != Role.Admin) {
+            throw new RuntimeException("Only admin can unblock this abonnement.");
+        }
+        abonnement.setBlocked(false);
+        abonnement.setAbonnementStatus(AbonnementStatus.ACTIVE);
+        return abonnementRepository.save(abonnement);
+    }
+
 }
