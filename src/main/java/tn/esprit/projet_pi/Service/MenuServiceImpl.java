@@ -27,12 +27,6 @@ public class MenuServiceImpl implements MenuService {
     private final UserRepo userRepository;
     private final RegimeAlimentaireRepository regimeAlimentaireRepository;
     private final EmailService emailService;
-    // Configuration pour Google Calendar (similaire à Cloudinary)
-    @Value("${google.calendar.api-key}") // Ajoutez votre clé API dans application.properties
-    private String apiKey;
-
-    @Value("${google.calendar.id}") // ID du calendrier, par exemple "primary"
-    private String calendarId;
 
 
     @Autowired
