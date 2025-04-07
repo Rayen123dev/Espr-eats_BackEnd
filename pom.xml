@@ -102,9 +102,21 @@
             <artifactId>dotenv-java</artifactId>
             <version>3.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>8.31.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version><!-- ou la version qui fonctionne bien avec Spring Security -->
+        </dependency>
+
+
+
 
     </dependencies>
-
 
     <build>
         <plugins>
