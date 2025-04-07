@@ -30,13 +30,6 @@ public class MenuServiceImpl implements MenuService {
     @Autowired
     private SmsService twilioService;
 
-    // Configuration pour Google Calendar (similaire à Cloudinary)
-    @Value("${google.calendar.api-key}") // Ajoutez votre clé API dans application.properties
-    private String apiKey;
-
-    @Value("${google.calendar.id}") // ID du calendrier, par exemple "primary"
-    private String calendarId;
-
 
     @Autowired
     public MenuServiceImpl(
