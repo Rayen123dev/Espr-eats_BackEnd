@@ -71,7 +71,7 @@ public class AbonnementService implements IAbonnement {
         transaction.setMontant(abonnement.getCout());
         transaction.setDateTransaction(LocalDateTime.now().withNano(0));
         transaction.setReferencePaiement("REF-" + newAbonnement.getIdAbonnement());
-        transaction.setDetails("Abonnement est en attente");
+        transaction.setDetails("Abonnement est encore en attente , le paiement n'est pas encore effectué");
         transactionService.createTransaction(transaction);
 
         return newAbonnement;
@@ -217,7 +217,7 @@ public class AbonnementService implements IAbonnement {
         transaction.setDateTransaction(LocalDateTime.now());
         transaction.setMontant(abonnement.getCout());
         transaction.setReferencePaiement("REF-" + abonnement.getIdAbonnement());
-        transaction.setDetails("Abonnement confirmé et actif");
+        transaction.setDetails("Abonnement confirmé et actif avec paiement validé");
         transactionRepository.save(transaction);
 
         return abonnement;
@@ -226,12 +226,17 @@ public class AbonnementService implements IAbonnement {
 
     private void sendActivationEmail(Abonnement abonnement) {
         String userEmail = abonnement.getUser().getEmail();
-        String subject = "Your Subscription is Now Active!";
+        String subject = "Votre Abonnement est Maintenant Activé!";
         String text = String.format(
-                "Dear %s,\n\n" +
-                        "Your subscription has been successfully activated!\n\n" +
-                        "Thank you for being a part of our service.\n\n" +
-                        "Best regards,\nYour Service Team",
+                """
+                        Dear %s,
+
+                        Your subscription has been successfully activated!
+
+                        Thank you for being a part of our service.
+
+                        Best regards,
+                        Your Service Team""",
                 abonnement.getUser().getNom()
         );
 
@@ -293,7 +298,7 @@ public class AbonnementService implements IAbonnement {
 
     public Abonnement getAbonnementByStripeSessionId(String stripeSessionId) {
         return abonnementRepository.findByStripeSessionId(stripeSessionId)
-                .orElseThrow(() -> new RuntimeException("Abonnement not found for session ID: " + stripeSessionId));
+                .orElseThrow(() -> new RuntimeException("Abonnement n'est pas trouvé pour session ID: " + stripeSessionId));
     }
 
     public TypeAbonnement getRecommendedSubscriptionType() {
@@ -321,15 +326,23 @@ public class AbonnementService implements IAbonnement {
 
     public Abonnement unblockAbonnement(Long abonnementId) {
         Abonnement abonnement = abonnementRepository.findById(abonnementId)
-                .orElseThrow(() -> new RuntimeException("Abonnement not found with ID: " + abonnementId));
+                .orElseThrow(() -> new RuntimeException("Abonnement n'est pas trouvé avec ID: " + abonnementId));
         if (!abonnement.getBlocked()) {
-            throw new RuntimeException("Abonnement is not blocked.");
+            throw new RuntimeException("Abonnement est bloqué.");
         }
         if (abonnement.getUser().getRole() != Role.Admin) {
-            throw new RuntimeException("Only admin can unblock this abonnement.");
+            throw new RuntimeException("seulement l'admin peut bloquer l'abonnement.");
         }
         abonnement.setBlocked(false);
         abonnement.setAbonnementStatus(AbonnementStatus.ACTIVE);
+        Transaction transaction = new Transaction();
+        transaction.setAbonnement(abonnement);
+        transaction.setStatus(TransactionStatus.ACTIVE);
+        transaction.setMontant(abonnement.getCout());
+        transaction.setDateTransaction(LocalDateTime.now().withNano(0));
+        transaction.setReferencePaiement("REF-" + abonnement.getIdAbonnement());
+        transaction.setDetails("votre abonnement est débloqué maintenant et vous pouvez faire ");
+        transactionService.createTransaction(transaction);
         return abonnementRepository.save(abonnement);
     }
 
