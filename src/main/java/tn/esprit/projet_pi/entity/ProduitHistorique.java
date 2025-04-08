@@ -1,6 +1,8 @@
 package tn.esprit.projet_pi.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -60,8 +62,9 @@ public class ProduitHistorique {
     }
 
     // Relation avec Produit (Many-to-One)
-    @ManyToOne
-    @JoinColumn(name = "produit_id", nullable = true)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "produit_id",nullable = true)
+    @JsonIgnoreProperties("historiques") // Prevent infinite recursion
     private Produit produit;
 
     // Relation avec Type de Transaction (enum)

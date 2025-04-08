@@ -10,4 +10,5 @@ public interface IProduitHistoriqueService {
 
     public void createHistory(Produit produit, TypeTransaction typeTransaction, int quantite);
     public List<ProduitHistorique> getAllHistory();
+
 }

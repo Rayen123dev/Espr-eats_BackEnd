@@ -1,6 +1,8 @@
 package tn.esprit.projet_pi.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,15 +30,40 @@ public class Produit {
     private int quantite;
     private double seuil_alerte;
     private Date date_peremption;
+    private String barcode;
 
-
-    @OneToMany( mappedBy="produit")
+    @OneToMany(mappedBy = "produit", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @JsonIgnoreProperties("produit")
     private List<ProduitHistorique> historiques;
+
+    @Override
+    public String toString() {
+        return "Produit{" +
+                "produitID=" + produitID +
+                ", nomProduit='" + nomProduit + '\'' +
+                ", description='" + description + '\'' +
+                ", quantite=" + quantite +
+                ", seuil_alerte=" + seuil_alerte +
+                ", date_peremption=" + date_peremption +
+                ", barcode='" + barcode + '\'' +
+                ", historiques=" + historiques +
+                ", plats=" + plats +
+                '}';
+    }
 
     @JsonIgnore
     @ManyToMany(mappedBy = "produits")
 
     private List<Plat> plats = new ArrayList<>();
+
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
+    }
 
     public List<Plat> getPlats() {
         return plats;

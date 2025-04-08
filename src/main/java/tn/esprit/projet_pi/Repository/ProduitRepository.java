@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface ProduitRepository extends JpaRepository<Produit,Integer> {
-
+    Produit findByBarcode(String barcode);
 
 }
