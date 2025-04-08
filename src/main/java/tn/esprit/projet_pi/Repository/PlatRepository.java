@@ -12,4 +12,5 @@ import java.util.List;
 public interface PlatRepository extends JpaRepository<Plat, Long> {
     List<Plat> findByCategorie(CategoriePlat categorie);
 
+
 }

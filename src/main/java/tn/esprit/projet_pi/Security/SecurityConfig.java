@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -12,64 +13,45 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tn.esprit.projet_pi.Log.OAuth2AuthenticationSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OAuth2AuthenticationSuccessHandler successHandler;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                          JwtAuthenticationFilter jwtAuthenticationFilter,
+                          OAuth2AuthenticationSuccessHandler successHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.successHandler = successHandler;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/auth/user_del/**").permitAll()
-                        .requestMatchers("/error", "/error/**").permitAll()
-                        //.requestMatchers(HttpMethod.POST, "/produit/add-produit").permitAll()
-                         .requestMatchers("/produit/**").permitAll()
-                          .requestMatchers("/api/plats/**").permitAll()
-                        .requestMatchers("/historique/**").permitAll()
-                        .requestMatchers("/api/plats/addplat/**").hasRole("Staff")
-                        .requestMatchers("/error", "/error/**").permitAll()
-
-
-                        //.requestMatchers(HttpMethod.POST, "/produit/add-produit").permitAll()
-                        /*/.requestMatchers(HttpMethod.POST).authenticated()
-
-                        .requestMatchers("/api/users/get").hasRole("ADMIN")  // Autorisation uniquement pour les utilisateurs avec le rôle ADMIN
-                        .requestMatchers("/api/users/accept/{userId}").hasAnyRole("ADMIN", "USER")
-
-                        .requestMatchers("/api/reclamations/**").permitAll()  // Autorisation uniquement pour les utilisateurs avec le rôle ADMIN
-                        .requestMatchers("/api/menus/generate/**").permitAll()
+                        .requestMatchers("/login", "/login/**", "/oauth2/authorization/**", "/login/oauth2/code/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/auth/user_del/**", "/api/reclamations/**", "/api/abonnement/**", "/api/application/**", "/api/offer/**").permitAll()
                         .requestMatchers("/api/menus/**").permitAll()
-                        .requestMatchers("/api/plats/addplat/**").hasRole("Staff")
+                        //.requestMatchers("/api/plats/**").hasRole("Staff")
+                        //.requestMatchers("/api/regimes/**").permitAll()
+                        .requestMatchers("/api/regimes/**").hasRole("Staff")
                         .requestMatchers("/api/plats/**").permitAll()
-                        .requestMatchers("/api/regimes/addregime/**").permitAll()
-                        .requestMatchers("/api/regimes/{id}/plats/**").permitAll()
-                        .requestMatchers("/api/users/accept/{userId}").hasAnyRole("ADMIN", "USER")
-
-                        .requestMatchers("/api/users/block/{userId}").hasRole("ADMIN")
-                        .requestMatchers("/api/stage/uploadFile").hasRole("ADMIN")
-                        .requestMatchers("/api/stage/lettre/{id}").hasRole("USER")
-                        .requestMatchers("/api/stage/getStages").hasRole("USER")*/
-
-
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(customizer -> customizer.configurationSource(corsConfigurationSource())); // Nouvelle approche pour CORS
+                .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(successHandler)
+                );
 
         return http.build();
     }
 
-    // Configure AuthenticationManager as a bean
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -80,22 +62,16 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Configuration CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:4200");  // Permet l'origine de votre front-end
-        configuration.addAllowedMethod("GET");
-        configuration.addAllowedMethod("POST");
-        configuration.addAllowedMethod("PUT");
-        configuration.addAllowedMethod("DELETE");
-        configuration.addAllowedMethod("OPTIONS");  // Ajoutez OPTIONS pour les pré-demandes
-        configuration.addAllowedHeader("*"); // Accepte tous les en-têtes
+        configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
-        configuration.addExposedHeader("Authorization");// Permet l'utilisation de cookies si nécessaire
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);  // Applique la configuration CORS à toutes les URL
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

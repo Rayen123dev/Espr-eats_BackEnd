@@ -1,5 +1,6 @@
 package tn.esprit.projet_pi.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -17,25 +18,50 @@ public class Plat {
 
     @Enumerated(EnumType.STRING)
     private CategoriePlat categorie;
+
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "added_by")
     private User addedBy;
 
     @ManyToMany
+    private String description;
+    private String nom;
+
+    // New calorie attribute
+    private Integer calories;
+
+    // Enlever la sérialisation de 'menus' et les relations inutiles ici
+    @ManyToMany(mappedBy = "plats")
+    @JsonIgnore
+    @JsonBackReference
+    private List<Menu> menus= new ArrayList<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(
-            name = "plat_produits",
+            name = "regime_alimentaire_plats_recommandes",
             joinColumns = @JoinColumn(name = "plat_id"),
-            inverseJoinColumns = @JoinColumn(name = "produit_id")
+            inverseJoinColumns = @JoinColumn(name = "regime_id")
     )
     private List<Produit> produits;
+    @JsonIgnore
+    private List<RegimeAlimentaire> regimes = new ArrayList<>();
+    private String imagePath;
 
     public List<Produit> getProduits() {
         return produits;
+    // Add getters and setters for the new field
+    public String getImagePath() {
+        return imagePath;
     }
 
     public void setProduits(List<Produit> produits) {
         this.produits = produits;
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
+
+    // Getters and setters
     public User getAddedBy() {
         return addedBy;
     }
@@ -109,4 +135,11 @@ public class Plat {
     private List<RegimeAlimentaire> regimes = new ArrayList<>();
 
 }
+    public Integer getCalories() {
+        return calories;
+    }
 
+    public void setCalories(Integer calories) {
+        this.calories = calories;
+    }
+}

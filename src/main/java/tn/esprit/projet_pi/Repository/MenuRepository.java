@@ -1,6 +1,7 @@
 package tn.esprit.projet_pi.Repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import tn.esprit.projet_pi.entity.Menu;
 import tn.esprit.projet_pi.entity.RegimeAlimentaireType;
@@ -10,10 +11,25 @@ import java.util.List;
 
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
-    // List<Menu> findByDateBetween(LocalDate startDate, LocalDate endDate);
     boolean existsByDateAndRegime(LocalDate date, RegimeAlimentaireType regime);
 
     List<Menu> findByOrderByDateAscIdAsc();
+    List<Menu> findByDateBetween(LocalDate startDate, LocalDate endDate);
 
+    // Find validated menus (fixed method name)
+    List<Menu> findByIsValidatedTrue();
 
+    // Find validated menus between dates (corrected signature)
+    List<Menu> findByIsValidatedTrueAndDateBetween(LocalDate startDate, LocalDate endDate);
+
+    // Find menus for upcoming week
+    @Query("SELECT m FROM Menu m WHERE m.date BETWEEN ?1 AND ?2 ORDER BY m.date ASC")
+    List<Menu> findMenusForDateRange(LocalDate startDate, LocalDate endDate);
+
+    // Find non-validated menus
+    List<Menu> findByIsValidatedFalse();
+
+    // Delete non-validated menus for a date range
+    void deleteByIsValidatedFalseAndDateBetween(LocalDate startDate, LocalDate endDate);
+    List<Menu> findByIsValidatedFalseAndDateBetween(LocalDate startDate, LocalDate endDate);
 }

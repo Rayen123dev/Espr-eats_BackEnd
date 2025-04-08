@@ -1,5 +1,7 @@
 package tn.esprit.projet_pi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -16,17 +18,23 @@ public class Menu {
     @Enumerated(EnumType.STRING)
     @Column(name = "regime_alimentaire_type")
     private RegimeAlimentaireType regime;
+
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "created_by")
     private User createdBy;
 
-    public User getCreatedBy() {
-        return createdBy;
-    }
+    // New field to track if a doctor has validated the menu
+    private Boolean isValidated = false;
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
+    // New field to store total calories
+    private Integer totalCalories = 0;
+
+    // New field to reference the doctor who validated the menu
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "validated_by")
+    private User validatedBy;
 
     @ManyToMany
     @JoinTable(
@@ -34,7 +42,7 @@ public class Menu {
             joinColumns = @JoinColumn(name = "menu_id"),
             inverseJoinColumns = @JoinColumn(name = "plats_id")
     )
-
+    @JsonManagedReference
     private List<Plat> plats;
 
     public Long getId() {
@@ -67,5 +75,49 @@ public class Menu {
 
     public void setPlats(List<Plat> plats) {
         this.plats = plats;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Boolean getIsValidated() {
+        return isValidated;
+    }
+
+    public void setIsValidated(Boolean isValidated) {
+        this.isValidated = isValidated;
+    }
+
+    public Integer getTotalCalories() {
+        return totalCalories;
+    }
+
+    public void setTotalCalories(Integer totalCalories) {
+        this.totalCalories = totalCalories;
+    }
+
+    public User getValidatedBy() {
+        return validatedBy;
+    }
+
+    public void setValidatedBy(User validatedBy) {
+        this.validatedBy = validatedBy;
+    }
+
+    // Method to calculate total calories from plats
+    public void calculateTotalCalories() {
+        if (plats != null && !plats.isEmpty()) {
+            this.totalCalories = plats.stream()
+                    .filter(plat -> plat.getCalories() != null)
+                    .mapToInt(Plat::getCalories)
+                    .sum();
+        } else {
+            this.totalCalories = 0;
+        }
     }
 }
