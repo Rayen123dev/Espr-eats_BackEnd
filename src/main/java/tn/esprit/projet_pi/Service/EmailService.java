@@ -113,23 +113,54 @@ public class EmailService {
 
     private String buildEmailBody(List<Menu> validatedMenus) {
         StringBuilder body = new StringBuilder();
-        body.append("<h2>Menu de la semaine Près </h2>");
-        body.append("<p>Bonjour,<br>Le menu de la semaine a été près et est maintenant disponible. Voici les détails :</p>");
-        body.append("<ul>");
+        // Conteneur principal avec style moderne
+        body.append("<div style=\"font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 650px; margin: 0 auto; background-color: #f9f9f9; border-radius: 10px; overflow: hidden;\">");
+
+        // En-tête avec couleur de fond
+        body.append("<div style=\"background-color: #2ecc71; padding: 20px; text-align: center; color: white;\">");
+        body.append("<h1 style=\"margin: 0; font-size: 24px;\">Menu de la semaine prêt</h1>");
+        body.append("</div>");
+
+        // Corps principal
+        body.append("<div style=\"padding: 25px; color: #444;\">");
+        body.append("<p style=\"font-size: 16px; line-height: 1.5;\">Bonjour,<br>Nous sommes ravis de vous informer que le menu de la semaine a été préparé et est prêt à être consulté. Voici un aperçu :</p>");
+
+        // Tableau des menus avec style amélioré
+        body.append("<table style=\"width: 100%; border-collapse: collapse; margin: 20px 0; background-color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);\">");
+        body.append("<thead>");
+        body.append("<tr style=\"background-color: #ecf0f1; color: #333;\">");
+        body.append("<th style=\"padding: 12px; border-bottom: 2px solid #ddd; text-align: left;\">Date</th>");
+        body.append("<th style=\"padding: 12px; border-bottom: 2px solid #ddd; text-align: left;\">Régime</th>");
+        body.append("<th style=\"padding: 12px; border-bottom: 2px solid #ddd; text-align: left;\">Calories</th>");
+        body.append("</tr>");
+        body.append("</thead>");
+        body.append("<tbody>");
 
         for (Menu menu : validatedMenus) {
-            body.append("<li>")
-                    .append(menu.getDate())
-                    .append(" - Régime : ")
-                    .append(menu.getRegime())
-                    .append(" - Calories totales : ")
-                    .append(menu.getTotalCalories())
-                    .append("</li>");
+            body.append("<tr style=\"border-bottom: 1px solid #eee;\">");
+            body.append("<td style=\"padding: 12px;\">").append(menu.getDate()).append("</td>");
+            body.append("<td style=\"padding: 12px;\">").append(menu.getRegime()).append("</td>");
+            body.append("<td style=\"padding: 12px; color: #e67e22;\">").append(menu.getTotalCalories()).append(" kcal</td>");
+            body.append("</tr>");
         }
 
-        body.append("</ul>");
-        body.append("<p>Vous pouvez consulter les détails dans l'application.</p>");
+        body.append("</tbody>");
+        body.append("</table>");
+
+        // Appel à l'action avec un bouton
+        body.append("<p style=\"font-size: 16px; line-height: 1.5;\">Consultez les détails complets et personnalisez vos préférences dans l'application :</p>");
+        body.append("<p style=\"text-align: center;\">");
+        body.append("<a href=\"http://localhost:4200/menu\" style=\"display: inline-block; padding: 12px 25px; background-color: #3498db; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;\">Voir dans l'application</a>");
+        body.append("</p>");
+
+        // Pied de page
+        body.append("<div style=\"margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; font-size: 14px; color: #777;\">");
         body.append("<p>Cordialement,<br>L'équipe de gestion des menus</p>");
+        body.append("<p style=\"font-size: 12px;\">Cet email est automatique, merci de ne pas y répondre.</p>");
+        body.append("</div>");
+
+        body.append("</div>"); // Fin du corps principal
+        body.append("</div>"); // Fin du conteneur principal
 
         return body.toString();
     }
