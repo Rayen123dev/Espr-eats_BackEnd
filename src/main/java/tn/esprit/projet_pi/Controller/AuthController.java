@@ -1,9 +1,7 @@
 package tn.esprit.projet_pi.Controller;
 
 import jakarta.persistence.Entity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +15,16 @@ import tn.esprit.projet_pi.Service.EmailService;
 import tn.esprit.projet_pi.Service.UserService;
 import tn.esprit.projet_pi.entity.ForgotPasswordRequest;
 import tn.esprit.projet_pi.entity.User;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import java.nio.charset.Charset;
 import java.util.*;
@@ -96,6 +104,23 @@ public class AuthController {
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+    @GetMapping("/usersp")
+    public ResponseEntity<Map<String, Object>> getPaginatedUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String search
+    ) {
+        Page<User> paginatedUsers = userService.getPaginatedUsers(page, size, filter, search);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", paginatedUsers.getContent());
+        response.put("totalItems", paginatedUsers.getTotalElements());
+        response.put("totalPages", paginatedUsers.getTotalPages());
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/user/{id}")
     public User getUser(@PathVariable Long id) {
         return userService.getUserById(id);
@@ -105,6 +130,26 @@ public class AuthController {
         boolean updated = userService.updateUser(id, updatedUser);
         if (updated) {
             return ResponseEntity.ok("User updated successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("User not found or update failed.");
+        }
+    }
+
+    @PutMapping("/BlocUser/{id}")
+    public ResponseEntity<String> BlocUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        boolean updated = userService.blocUser(id);
+        if (updated) {
+            return ResponseEntity.ok("User updated Bloc successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("User not found or update failed.");
+        }
+    }
+
+    @PutMapping("/ActiveUser/{id}")
+    public ResponseEntity<String> ActiveUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        boolean updated = userService.activUser(id);
+        if (updated) {
+            return ResponseEntity.ok("User updated Active successfully.");
         } else {
             return ResponseEntity.badRequest().body("User not found or update failed.");
         }
