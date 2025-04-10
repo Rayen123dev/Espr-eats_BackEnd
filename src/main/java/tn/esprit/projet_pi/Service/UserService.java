@@ -114,6 +114,15 @@ public class UserService implements UserInterface{
         }).orElse(false);
     }
 
+    @Override
+    public boolean activUser(Long id) {
+        return userRepo.findByidUser(id).map(user -> {
+            user.setIs_verified(Boolean.valueOf("TRUE"));
+            userRepo.save(user);
+            return true;
+        }).orElse(false);
+    }
+
     /**
      * Générer un token de réinitialisation de mot de passe.
      */

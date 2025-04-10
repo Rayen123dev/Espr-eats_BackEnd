@@ -20,4 +20,5 @@ public interface UserInterface {
     public List<User> getUserByRole(String role);
 
     boolean blocUser(Long id);
+    boolean activUser(Long id);
 }
