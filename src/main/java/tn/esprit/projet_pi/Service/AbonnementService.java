@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tn.esprit.projet_pi.Repository.AbonnementRepository;
+import tn.esprit.projet_pi.Repository.DiscountRepository;
 import tn.esprit.projet_pi.Repository.TransactionRepository;
 import tn.esprit.projet_pi.Repository.UserRepo;
 import tn.esprit.projet_pi.entity.*;
@@ -23,14 +24,16 @@ public class AbonnementService implements IAbonnement {
     private final TransactionRepository transactionRepository;
     TransactionService transactionService;
     EmailAbonnementService emailService;
+    private final DiscountRepository discountRepository;
 
     @Autowired
-    public AbonnementService(AbonnementRepository abonnementRepository, UserRepo userRepo, TransactionService transactionService, EmailAbonnementService emailService, TransactionRepository transactionRepository) {
+    public AbonnementService(AbonnementRepository abonnementRepository, UserRepo userRepo, TransactionService transactionService, EmailAbonnementService emailService, TransactionRepository transactionRepository, DiscountRepository discountRepository) {
         this.abonnementRepository = abonnementRepository;
         this.userRepo = userRepo;
         this.transactionService = transactionService;
         this.emailService = emailService;
         this.transactionRepository = transactionRepository;
+        this.discountRepository = discountRepository;
     }
 
     @Override
@@ -47,7 +50,13 @@ public class AbonnementService implements IAbonnement {
         LocalDate dateDebut = LocalDate.now();
         abonnement.setDateDebut(dateDebut);
         abonnement.setAbonnementStatus(AbonnementStatus.PENDING);
-        abonnement.setCout(calculateCout(abonnement.getTypeAbonnement()));
+        Map<String, Double> subscriptionCosts = getSubscriptionTypesAndCosts();
+        Double cost = subscriptionCosts.get(abonnement.getTypeAbonnement().name());
+        if (cost == null) {
+            // Fallback to base cost if something goes wrong
+            cost = calculateCout(abonnement.getTypeAbonnement());
+        }
+        abonnement.setCout(cost);
         abonnement.setConfirmed(abonnement.getConfirmed());
         abonnement.setBlocked(abonnement.getBlocked());
 
@@ -280,8 +289,36 @@ public class AbonnementService implements IAbonnement {
 
     public Map<String, Double> getSubscriptionTypesAndCosts() {
         Map<String, Double> subscriptionTypes = new HashMap<>();
+        LocalDateTime now = LocalDateTime.now();
+
         for (TypeAbonnement type : TypeAbonnement.values()) {
-            subscriptionTypes.put(type.name(), calculateCout(type));
+            double baseCost = calculateCout(type);
+            double discountedCost = baseCost;
+
+            // Safely query discounts with fallback
+            try {
+                List<Discount> discounts = discountRepository.findByType(type);
+                if (discounts != null) {
+                    discounts = discounts.stream()
+                            .filter(d -> Boolean.TRUE.equals(d.getActive()) &&
+                                    d.getAbonnement() == null &&
+                                    d.getStartDate() != null && d.getEndDate() != null &&
+                                    (d.getStartDate().isBefore(now) || d.getStartDate().isEqual(now)) &&
+                                    (d.getEndDate().isAfter(now) || d.getEndDate().isEqual(now)))
+                            .toList();
+
+                    if (!discounts.isEmpty()) {
+                        Discount discount = discounts.get(0);
+                        discountedCost = baseCost - (baseCost * discount.getPercentage() / 100.0);
+                        System.out.println("Applied " + discount.getPercentage() + "% discount to " + type + ": " + discountedCost);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Error fetching discounts for " + type + ": " + e.getMessage());
+                // Fallback to base cost if discount query fails
+            }
+
+            subscriptionTypes.put(type.name(), discountedCost);
         }
         return subscriptionTypes;
     }
