@@ -27,12 +27,10 @@ public class MenuServiceImpl implements MenuService {
     private final UserRepo userRepository;
     private final RegimeAlimentaireRepository regimeAlimentaireRepository;
     private final EmailService emailService;
-    // Configuration pour Google Calendar (similaire à Cloudinary)
-    @Value("${google.calendar.api-key}") // Ajoutez votre clé API dans application.properties
-    private String apiKey;
 
-    @Value("${google.calendar.id}") // ID du calendrier, par exemple "primary"
-    private String calendarId;
+    @Autowired
+    private SmsService twilioService;
+
 
 
     @Autowired
@@ -103,11 +101,36 @@ public class MenuServiceImpl implements MenuService {
                             " - Calories: " + menu.getTotalCalories());
                 }
             }
+
+            // Envoi des SMS aux médecins
+            List<User> doctors = userRepository.findByRole(Role.Medecin);
+            LOGGER.info("Nombre de médecins trouvés: " + doctors.size());
+            if (!doctors.isEmpty()) {
+                String smsMessage = "Les menus de la semaine prochaine ont été générés. Veuillez les valider.";
+                for (User doctor : doctors) {
+                    LOGGER.info("Vérification du médecin ID: " + doctor.getIdUser() + ", Téléphone: " + doctor.getTelephone());
+                    if (doctor.getTelephone() != null && !doctor.getTelephone().isEmpty()) {
+                        String phone = doctor.getTelephone().startsWith("+") ? doctor.getTelephone() : "+216" + doctor.getTelephone();
+                        try {
+                            LOGGER.info("Tentative d'envoi SMS à: " + phone);
+                            twilioService.sendSms(phone, smsMessage);
+                            LOGGER.info("📱 SMS envoyé au médecin ID: " + doctor.getIdUser() + " - Numéro: " + phone);
+                        } catch (Exception e) {
+                            LOGGER.severe("❌ Erreur lors de l'envoi du SMS au médecin ID: " + doctor.getIdUser() + " - " + e.getMessage());
+                        }
+                    } else {
+                        LOGGER.warning("⚠️ Numéro de téléphone manquant pour le médecin ID: " + doctor.getIdUser());
+                    }
+                }
+            } else {
+                LOGGER.warning("⚠️ Aucun médecin trouvé pour recevoir le SMS");
+            }
         } catch (Exception e) {
             LOGGER.severe("❌ Erreur lors de la génération des menus : " + e.getMessage());
             throw new RuntimeException("Erreur lors de la génération des menus", e);
         }
     }
+
 
     private List<Plat> generateCompleteMenuForRegime(RegimeAlimentaire regimeAlimentaire, LocalDate date) {
         List<Plat> plats = new ArrayList<>();
@@ -293,7 +316,7 @@ public class MenuServiceImpl implements MenuService {
             }
         }
     }
-//"0 * * * * *"
+    //"0 * * * * *"
     @Override
     @Scheduled(cron = "0 0 0 * * FRI")
     public void scheduleMenuGeneration() {

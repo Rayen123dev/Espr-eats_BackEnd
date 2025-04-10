@@ -26,6 +26,7 @@ public class MenuController {
     @Autowired
     private UserRepo userRepository;
 
+
     // Endpoint pour générer les menus de la semaine
     @RequestMapping(value="/generate",method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> generateMenus(@RequestParam Long userId) {
