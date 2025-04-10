@@ -1,8 +1,6 @@
 package tn.esprit.projet_pi.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Repository.UserRepo;
 import tn.esprit.projet_pi.entity.User;
@@ -19,6 +17,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.security.KeyRep.Type.SECRET;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class UserService implements UserInterface{
@@ -176,6 +181,24 @@ public class UserService implements UserInterface{
     public void saveUser(User user) {
         userRepo.save(user);
     }
+
+    public Page<User> getPaginatedUsers(int page, int size, String filter, String search) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        if (search != null && !search.isEmpty()) {
+            if (filter != null && !filter.isEmpty()) {
+                return userRepo.findByRoleAndNomContainingIgnoreCase(filter, search, pageable);
+            } else {
+                return userRepo.findByNomContainingIgnoreCase(search, pageable);
+            }
+        } else {
+            if (filter != null && !filter.isEmpty()) {
+                return userRepo.findByRole(filter, pageable);
+            } else {
+                return userRepo.findAll(pageable);
+            }
+        }
+    }
+
 
     /*public boolean generatePasswordResetToken(String email) {
         Optional<User> userOpt = userRepo.findByEmail(email);
