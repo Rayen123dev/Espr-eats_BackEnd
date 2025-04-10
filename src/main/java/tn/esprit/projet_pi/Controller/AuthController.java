@@ -134,6 +134,16 @@ public class AuthController {
             return ResponseEntity.badRequest().body("User not found or update failed.");
         }
     }
+
+    @PutMapping("/BlocUser/{id}")
+    public ResponseEntity<String> BlocUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        boolean updated = userService.blocUser(id);
+        if (updated) {
+            return ResponseEntity.ok("User updated Bloc successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("User not found or update failed.");
+        }
+    }
     /*
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody String email) {

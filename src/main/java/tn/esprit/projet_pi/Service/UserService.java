@@ -1,5 +1,6 @@
 package tn.esprit.projet_pi.Service;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Repository.UserRepo;
@@ -102,6 +103,15 @@ public class UserService implements UserInterface{
     @Override
     public List<User> getUserByRole(String role) {
         return List.of();
+    }
+
+    @Override
+    public boolean blocUser(Long id) {
+        return userRepo.findByidUser(id).map(user -> {
+            user.setIs_verified(Boolean.valueOf("NULL"));
+            userRepo.save(user);
+            return true;
+        }).orElse(false);
     }
 
     /**

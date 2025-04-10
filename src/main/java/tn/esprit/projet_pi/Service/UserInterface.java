@@ -18,4 +18,6 @@ public interface UserInterface {
     public boolean addUser(User user);
     public List<User> getUserByName(String username);
     public List<User> getUserByRole(String role);
+
+    boolean blocUser(Long id);
 }
