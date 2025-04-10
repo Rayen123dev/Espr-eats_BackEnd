@@ -28,6 +28,7 @@ import java.util.Map;
 
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -69,11 +70,8 @@ public class AuthController {
         user.setRole(request.getRole());
         user.setAge(request.getAge());
         user.setLink_Image(request.getLink_Image());
-
-
         String verificationToken = UUID.randomUUID().toString();
         user.setVerificationToken(verificationToken);
-
         User registeredUser = userService.register(user);
         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
 
@@ -154,54 +152,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("User not found or update failed.");
         }
     }
-    /*
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
-        boolean result = userService.generatePasswordResetToken(email);
-        if (result) {
-            return ResponseEntity.ok("Un lien de réinitialisation a été envoyé à votre e-mail.");
-        } else {
-            return ResponseEntity.badRequest().body("Aucun utilisateur trouvé avec cet e-mail.");
-        }
-    }
 
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody EmailRequest request) {
-        String email = request.getEmail();
-        JwtService jwtService = new JwtService();
-        User user = userService.getUserByEmail(email);
-        String token = jwtService.generateToken(user);
-        System.out.println("Email reçu dans la requête : '" + email + "'");
-
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().body("L'email est vide ou invalide.");
-        }
-
-        boolean result = userService.generatePasswordResetToken(email);
-        if (result) {
-            emailService.sendResetPasswordEmail(email, token);
-            return ResponseEntity.ok("Un lien de réinitialisation a été envoyé à votre e-mail.");
-
-        } else {
-            return ResponseEntity.badRequest().body("Aucun utilisateur trouvé avec cet e-mail.");
-        }
-    }
-
-    /**
-     * Endpoint pour réinitialiser le mot de passe avec un token.
-
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        System.out.println("Received token: " + token);  // Debugging print to check if token is correct
-        boolean result = userService.resetPassword(token, newPassword);
-        if (result) {
-            return ResponseEntity.ok("Mot de passe réinitialisé avec succès.");
-        } else {
-            return ResponseEntity.badRequest().body("Token invalide ou expiré.");
-        }
-    }
-*/
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         String email = request.getEmail(); // On récupère l'email de l'objet envoyé
@@ -215,8 +166,6 @@ public class AuthController {
         }
         return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Aucun utilisateur trouvé avec cet email."));
     }
-
-
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         String email = jwtService.extractUsername(token); // Extraction de l'email du token
@@ -225,15 +174,10 @@ public class AuthController {
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("Utilisateur introuvable.");
         }
-
         User user = userOptional.get();
-
         // Optionnel : vous pouvez vérifier que le token n'est pas expiré, selon votre logique
-
-
         user.setMdp(passwordEncoder.encode(newPassword)); // Encodage du nouveau mot de passe
         userRepo.save(user); // Sauvegarde du mot de passe réinitialisé
-
         return ResponseEntity.ok("Votre mot de passe a été réinitialisé avec succès.");
     }
     @PostMapping("/test-email")
@@ -245,20 +189,28 @@ public class AuthController {
             return ResponseEntity.status(500).body("Erreur : " + e.getMessage());
         }
     }
-
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam String token) {
         User user = userService.findByVerificationToken(token);
         if (user == null) {
             return ResponseEntity.badRequest().body("Token invalide !");
         }
-
         user.setIs_verified(true);
         user.setVerificationToken(null);
         userService.saveUser(user);
-
         return ResponseEntity.ok("Email vérifié avec succès !");
     }
 
+    @GetMapping("/search")
+    public List<User> search(@RequestParam("query") String query) {
+        // Fetch all users from the service
+        List<User> allItems = userService.getAllUsers();
+
+        // Perform search filtering on 'nom' and 'email'
+        return allItems.stream()
+                .filter(item -> item.getNom().toLowerCase().contains(query.toLowerCase()) ||
+                        item.getEmail().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+    }
 
 }
