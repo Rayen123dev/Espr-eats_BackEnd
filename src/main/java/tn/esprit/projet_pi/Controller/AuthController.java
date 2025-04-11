@@ -9,10 +9,7 @@ import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Log.LoginRequest;
 import tn.esprit.projet_pi.Log.RegisterRequest;
 import tn.esprit.projet_pi.Repository.UserRepo;
-import tn.esprit.projet_pi.Service.CaptchaService;
-import tn.esprit.projet_pi.Service.CloudinaryService;
-import tn.esprit.projet_pi.Service.EmailService;
-import tn.esprit.projet_pi.Service.UserService;
+import tn.esprit.projet_pi.Service.*;
 import tn.esprit.projet_pi.entity.ForgotPasswordRequest;
 import tn.esprit.projet_pi.entity.User;
 
@@ -41,6 +38,8 @@ public class AuthController {
     private final JwtService jwtService;
     private final CloudinaryService cloudinaryService;
     private final CaptchaService captchaService;
+    @Autowired
+    private LoginAttemptService loginAttemptService;
 
 
     public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService, CloudinaryService cloudinaryService, CaptchaService captchaService) {
@@ -63,6 +62,12 @@ public class AuthController {
 
     @PostMapping(value = "/signup", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> signup(@RequestBody RegisterRequest request) {
+        List<User> users = userRepo.findAll();
+        for (User user : users) {
+            if ((user.getEmail()).equals(request.getEmail())) {
+                return ResponseEntity.badRequest().body("Email already in use.");
+            }
+        }
         User user = new User();
         user.setNom(request.getNom());
         user.setEmail(request.getEmail());
@@ -78,17 +83,34 @@ public class AuthController {
         return ResponseEntity.ok("Utilisateur inscrit avec succès. Veuillez vérifier votre e-mail.");
 
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> signin(@RequestBody LoginRequest loginRequest) {
-        String token = String.valueOf(userService.login(loginRequest.getEmail(), loginRequest.getMdp()));
-        boolean captchaVerified = captchaService.verifyCaptcha(loginRequest.getCaptchaToken());
+        String email = loginRequest.getEmail();
 
-        if (!captchaVerified) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("CAPTCHA verification failed.");
+        if (loginAttemptService.isBlocked(email)) {
+            long minutes = loginAttemptService.getRemainingLockTime(email) / 60000;
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("Compte bloqué temporairement. Réessayez dans " + minutes + " minute(s).");
         }
-        // Renvoyer le token dans une réponse JSON
-        return ResponseEntity.ok(Collections.singletonMap("token", token)); // Utilisation d'une map pour inclure le token dans une structure JSON
+
+        boolean captchaVerified = captchaService.verifyCaptcha(loginRequest.getCaptchaToken());
+        if (!captchaVerified) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Échec de la vérification CAPTCHA.");
+        }
+
+        String token = userService.login(email, loginRequest.getMdp());
+
+        if (token != null) {
+            loginAttemptService.loginSucceeded(email);
+            return ResponseEntity.ok(Collections.singletonMap("token", token));
+        } else {
+            loginAttemptService.loginFailed(email);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Identifiants invalides.");
+        }
     }
+
+
     @DeleteMapping("/user_del/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);

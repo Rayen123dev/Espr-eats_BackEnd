@@ -2,6 +2,7 @@ package tn.esprit.projet_pi.Service;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.servlet.View;
 import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Repository.UserRepo;
 import tn.esprit.projet_pi.entity.User;
@@ -12,10 +13,7 @@ import io.jsonwebtoken.SignatureException;
 
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.security.KeyRep.Type.SECRET;
 
@@ -41,7 +39,6 @@ public class UserService implements UserInterface{
             if (passwordEncoder.matches(password,u.getMdp()))
                 return JwtService.generateToken(u);
         }
-
         return null;
 
     }
