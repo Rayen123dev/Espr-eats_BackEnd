@@ -5,6 +5,8 @@ import tn.esprit.projet_pi.Repository.DiscountRepository;
 import tn.esprit.projet_pi.entity.Discount;
 import tn.esprit.projet_pi.interfaces.IDiscount;
 
+import java.time.LocalDateTime;
+
 @Service
 public class DiscountService implements IDiscount {
 
@@ -15,6 +17,7 @@ public class DiscountService implements IDiscount {
     }
     @Override
     public Discount createDiscount(Discount discount, Long userId) {
+        validateDates(discount.getStartDate(), discount.getEndDate());
         return discountRepository.save(discount);
     }
 
@@ -35,5 +38,14 @@ public class DiscountService implements IDiscount {
     @Override
     public Discount getDiscountById(Long userId, Long idDiscount) {
         return discountRepository.findById(idDiscount).orElse(null);
+    }
+
+    private void validateDates(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date must not be null.");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
     }
 }

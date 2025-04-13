@@ -28,6 +28,8 @@ public class Abonnement {
     private long remainingDays;
     private String stripeSessionId;
 
+    private int failedConfirmationAttempts;
+
 
     @Column(unique = true)
     private String confirmationCode;
@@ -190,5 +192,13 @@ public class Abonnement {
     }
     public void setStripeSessionId(String stripeSessionId) {
         this.stripeSessionId = stripeSessionId;
+    }
+
+    public int getFailedConfirmationAttempts() {
+        return failedConfirmationAttempts;
+    }
+
+    public void setFailedConfirmationAttempts(int failedConfirmationAttempts) {
+        this.failedConfirmationAttempts = failedConfirmationAttempts;
     }
 }

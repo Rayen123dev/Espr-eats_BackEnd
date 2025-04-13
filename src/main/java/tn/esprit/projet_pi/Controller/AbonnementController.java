@@ -206,4 +206,6 @@ public class AbonnementController {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
+
+
 }

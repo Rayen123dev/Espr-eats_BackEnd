@@ -2,6 +2,7 @@ package tn.esprit.projet_pi.Service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import tn.esprit.projet_pi.Repository.AbonnementRepository;
 import tn.esprit.projet_pi.Repository.DiscountRepository;
@@ -208,6 +209,23 @@ public class AbonnementService implements IAbonnement {
             throw new RuntimeException("The code doesn't match the user's abonnement");
         }
 
+        if (abonnement.getBlocked()) {
+            throw new RuntimeException("Abonnement is already blocked.");
+        }
+
+        //I want to check if the code in the body is not equal to the code in the db , the failed_attempts increase by one and the maximum is 3 attempts then the abonnement get blocked
+        if (!abonnement.getConfirmationCode().equals(confirmationCode)) {
+            abonnement.setFailedConfirmationAttempts(abonnement.getFailedConfirmationAttempts() + 1);
+            if (abonnement.getFailedConfirmationAttempts() >= 3) {
+                abonnement.setBlocked(true);
+                abonnement.setAbonnementStatus(AbonnementStatus.SUSPENDED);
+                abonnementRepository.save(abonnement);
+                throw new RuntimeException("Abonnement is blocked due to too many failed attempts.");
+            }
+            abonnementRepository.save(abonnement);
+            throw new RuntimeException("Invalid confirmation code");
+        }
+
         // Check if the code has expired
         if (abonnement.isCodeExpired()) {
             throw new RuntimeException("Confirmation code has expired");
@@ -216,6 +234,7 @@ public class AbonnementService implements IAbonnement {
         // Confirm the abonnement
         abonnement.setConfirmed(true);
         abonnement.setAbonnementStatus(AbonnementStatus.ACTIVE);
+        abonnement.setFailedConfirmationAttempts(0);
         abonnementRepository.save(abonnement);
         sendActivationEmail(abonnement);
 
@@ -383,4 +402,52 @@ public class AbonnementService implements IAbonnement {
         return abonnementRepository.save(abonnement);
     }
 
+    @Transactional
+    public Abonnement blockAbonnement(Long abonnementId, String reason) {
+        Abonnement abonnement = abonnementRepository.findById(abonnementId)
+                .orElseThrow(() -> new RuntimeException("Abonnement n'est pas trouvé avec ID: " + abonnementId));
+        if (abonnement.getBlocked()) {
+            throw new RuntimeException("Abonnement est déjà bloqué.");
+        }
+        abonnement.setBlocked(true);
+        abonnement.setAbonnementStatus(AbonnementStatus.SUSPENDED);
+        abonnement.setRemainingDays(abonnement.calculateRemainingDays());
+        abonnementRepository.save(abonnement);
+
+        Transaction transaction = new Transaction();
+        transaction.setAbonnement(abonnement);
+        transaction.setStatus(TransactionStatus.BLOCKED);
+        transaction.setMontant(abonnement.getCout());
+        transaction.setDateTransaction(LocalDateTime.now().withNano(0));
+        transaction.setReferencePaiement("REF-" + abonnement.getIdAbonnement() + "-BLOCK");
+        transaction.setDetails("Abonnement bloqué: " + reason);
+        transactionService.createTransaction(transaction);
+
+        emailService.sendGenericEmail(
+                abonnement.getUser().getEmail(),
+                "Abonnement Bloqué",
+                "Votre abonnement a été bloqué pour la raison suivante: " + reason + ". Veuillez contacter le support pour réactiver."
+        );
+
+        return abonnement;
+    }
+
+    @Transactional
+    public void checkFailedPaymentAttempts(Long abonnementId) {
+        Abonnement abonnement = abonnementRepository.findById(abonnementId)
+                .orElseThrow(() -> new RuntimeException("Abonnement n'est pas trouvé avec ID: " + abonnementId));
+        long failedAttempts = transactionRepository.findByAbonnementAndStatus(abonnement, TransactionStatus.BLOCKED).size();
+        if (failedAttempts >= 3) {
+            blockAbonnement(abonnementId, "Trois tentatives de paiement échouées");
+        }
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void monitorPaymentFailures() {
+        List<Abonnement> activeAbonnements = abonnementRepository.findAllByAbonnementStatusAndRenouvellementAutomatiqueTrue(AbonnementStatus.ACTIVE);
+        for (Abonnement abonnement : activeAbonnements) {
+            checkFailedPaymentAttempts(abonnement.getIdAbonnement());
+        }
+    }
 }

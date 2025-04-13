@@ -40,4 +40,6 @@ public interface AbonnementRepository  extends JpaRepository<Abonnement, Long> {
     @Query("SELECT a.typeAbonnement, COUNT(a) FROM Abonnement a GROUP BY a.typeAbonnement")
     List<Object[]> countSubscriptionsByType();
 
+    List<Abonnement> findAllByAbonnementStatusAndRenouvellementAutomatiqueTrue(AbonnementStatus abonnementStatus);
+
 }

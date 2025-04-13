@@ -16,6 +16,7 @@ public class DiscountController {
         this.discountService = discountService;
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/create/{userId}")
     public Discount createDiscount(@PathVariable Long userId,@RequestBody Discount discount) {
         return discountService.createDiscount(discount, userId);
