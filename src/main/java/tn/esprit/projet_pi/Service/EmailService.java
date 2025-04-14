@@ -113,7 +113,7 @@ public class EmailService {
         message.setText("Bonjour,\n\n"
                 + "Nous avons reçu une demande de réinitialisation de votre mot de passe. "
                 + "Si vous êtes à l'origine de cette demande, veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :\n\n"
-                + "http://votre-domaine.com/reset-password?token=" + token + "\n\n"
+                + "http://localhost:4200/reset-password?token=" + token + "\n\n"
                 + "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail. "
                 + "Votre mot de passe restera inchangé.\n\n"
                 + "Cordialement,\n"
