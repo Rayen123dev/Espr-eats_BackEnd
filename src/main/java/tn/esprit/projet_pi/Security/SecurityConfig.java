@@ -44,10 +44,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
-                .oauth2Login(oauth2 -> oauth2
-                        .successHandler(successHandler)
-                );
+                .cors(customizer -> customizer.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
