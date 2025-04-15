@@ -66,7 +66,7 @@ public class ProfilNutritionnelServiceImpl implements IProfilNutritionnelService
 
         historique.setImc(ancien.getImc());
         historique.setBesoinCalorique(ancien.getBesoinCalorique());
-        historique.setCommentaire(user.getRole() == Role.Medcin ?
+        historique.setCommentaire(user.getRole() == Role.Medecin ?
                 "Mise à jour effectuée par le médecin." :
                 "Mise à jour effectuée par l'étudiant.");
 

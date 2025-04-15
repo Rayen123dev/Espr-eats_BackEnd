@@ -32,7 +32,7 @@ public class ConsultationServiceImpl implements IConsultationService {
         User etudiant = userRepo.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Étudiant non trouvé"));
 
-        User medecin = userRepo.findByRole(Role.Medcin)
+        User medecin = userRepo.findByRole(Role.Medecin)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
