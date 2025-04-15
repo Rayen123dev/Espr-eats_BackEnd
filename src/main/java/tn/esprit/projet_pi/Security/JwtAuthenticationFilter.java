@@ -27,36 +27,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        String path = request.getServletPath();
+
+        // Ignorer certains endpoints publics
+        if (path.startsWith("/api/auth/signup") ||
+                path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/auth/user_del") ||
+                path.startsWith("/api/reclamations") ||
+                path.startsWith("/api/abonnement") ||
+                path.startsWith("/api/application") ||
+                path.startsWith("/api/offer")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
         String jwt = null;
         String userEmail = null;
 
-        // Vérifiez si l'en-tête contient un token JWT valide
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7);  // Extraction du token
-            userEmail = jwtService.extractUsername(jwt);  // Extraction de l'email du JWT
+            jwt = authHeader.substring(7);
+            userEmail = jwtService.extractUsername(jwt);
         }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-            // Validation du token
             if (jwtService.validateToken(jwt, userDetails)) {
                 var authentication = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Mise à jour du contexte de sécurité
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                // Gestion de l'erreur si le token est invalide
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
                 return;
             }
         }
 
-        // Passe au filtre suivant
         filterChain.doFilter(request, response);
     }
 }

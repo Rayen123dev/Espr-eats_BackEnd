@@ -8,6 +8,7 @@ import lombok.Setter;
 public class LoginRequest {
     private String Email;
     private String Mdp;
+    private String captchaToken;
 
     public String getEmail() {
         return Email;
@@ -23,5 +24,13 @@ public class LoginRequest {
 
     public void setMdp(String mdp) {
         Mdp = mdp;
+    }
+
+    public String getCaptchaToken() {
+        return captchaToken;
+    }
+
+    public void setCaptchaToken(String captchaToken) {
+        this.captchaToken = captchaToken;
     }
 }

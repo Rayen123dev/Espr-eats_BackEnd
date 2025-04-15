@@ -1,21 +1,31 @@
 package tn.esprit.projet_pi.Controller;
 
 import jakarta.persistence.Entity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Log.LoginRequest;
 import tn.esprit.projet_pi.Log.RegisterRequest;
 import tn.esprit.projet_pi.Repository.UserRepo;
-import tn.esprit.projet_pi.Service.EmailService;
-import tn.esprit.projet_pi.Service.UserService;
+import tn.esprit.projet_pi.Service.*;
 import tn.esprit.projet_pi.entity.ForgotPasswordRequest;
 import tn.esprit.projet_pi.entity.User;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import java.util.HashMap;
+import java.util.Map;
+
+
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,16 +36,38 @@ public class AuthController {
     private final EmailService emailService;
     private final UserRepo userRepo;
     private final JwtService jwtService;
+    private final CloudinaryService cloudinaryService;
+    private final CaptchaService captchaService;
+    @Autowired
+    private LoginAttemptService loginAttemptService;
 
-    public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService) {
+
+    public AuthController(UserService userService, EmailService emailService, UserRepo userRepo, JwtService jwtService, CloudinaryService cloudinaryService, CaptchaService captchaService) {
         this.userService = userService;
         this.emailService = emailService;
         this.userRepo = userRepo;
         this.jwtService = jwtService;
+        this.cloudinaryService = cloudinaryService;
+        this.captchaService = captchaService;
+    }
+    @PostMapping("/upload-image")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = cloudinaryService.uploadImage(file);
+            return ResponseEntity.ok(Collections.singletonMap("imageUrl", imageUrl));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Image upload failed: " + e.getMessage());
+        }
     }
 
-    @PostMapping("/signup")
+    @PostMapping(value = "/signup", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> signup(@RequestBody RegisterRequest request) {
+        List<User> users = userRepo.findAll();
+        for (User user : users) {
+            if ((user.getEmail()).equals(request.getEmail())) {
+                return ResponseEntity.badRequest().body("Email already in use.");
+            }
+        }
         User user = new User();
         user.setNom(request.getNom());
         user.setEmail(request.getEmail());
@@ -43,24 +75,42 @@ public class AuthController {
         user.setRole(request.getRole());
         user.setAge(request.getAge());
         user.setLink_Image(request.getLink_Image());
-
-
         String verificationToken = UUID.randomUUID().toString();
         user.setVerificationToken(verificationToken);
-
         User registeredUser = userService.register(user);
         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
 
         return ResponseEntity.ok("Utilisateur inscrit avec succès. Veuillez vérifier votre e-mail.");
 
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> signin(@RequestBody LoginRequest loginRequest) {
-        String token = String.valueOf(userService.login(loginRequest.getEmail(), loginRequest.getMdp()));
+        String email = loginRequest.getEmail();
 
-        // Renvoyer le token dans une réponse JSON
-        return ResponseEntity.ok(Collections.singletonMap("token", token)); // Utilisation d'une map pour inclure le token dans une structure JSON
+        if (loginAttemptService.isBlocked(email)) {
+            long minutes = loginAttemptService.getRemainingLockTime(email) / 60000;
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body("Compte bloqué temporairement. Réessayez dans " + minutes + " minute(s).");
+        }
+
+        boolean captchaVerified = captchaService.verifyCaptcha(loginRequest.getCaptchaToken());
+        if (!captchaVerified) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Échec de la vérification CAPTCHA.");
+        }
+
+        String token = userService.login(email, loginRequest.getMdp());
+
+        if (token != null) {
+            loginAttemptService.loginSucceeded(email);
+            return ResponseEntity.ok(Collections.singletonMap("token", token));
+        } else {
+            loginAttemptService.loginFailed(email);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Identifiants invalides.");
+        }
     }
+
+
     @DeleteMapping("/user_del/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = userService.deleteUser(id);
@@ -74,6 +124,23 @@ public class AuthController {
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+    @GetMapping("/usersp")
+    public ResponseEntity<Map<String, Object>> getPaginatedUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String search
+    ) {
+        Page<User> paginatedUsers = userService.getPaginatedUsers(page, size, filter, search);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", paginatedUsers.getContent());
+        response.put("totalItems", paginatedUsers.getTotalElements());
+        response.put("totalPages", paginatedUsers.getTotalPages());
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/user/{id}")
     public User getUser(@PathVariable Long id) {
         return userService.getUserById(id);
@@ -87,54 +154,27 @@ public class AuthController {
             return ResponseEntity.badRequest().body("User not found or update failed.");
         }
     }
-    /*
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
-        boolean result = userService.generatePasswordResetToken(email);
-        if (result) {
-            return ResponseEntity.ok("Un lien de réinitialisation a été envoyé à votre e-mail.");
+
+    @PutMapping("/BlocUser/{id}")
+    public ResponseEntity<String> BlocUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        boolean updated = userService.blocUser(id);
+        if (updated) {
+            return ResponseEntity.ok("User updated Bloc successfully.");
         } else {
-            return ResponseEntity.badRequest().body("Aucun utilisateur trouvé avec cet e-mail.");
+            return ResponseEntity.badRequest().body("User not found or update failed.");
         }
     }
 
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody EmailRequest request) {
-        String email = request.getEmail();
-        JwtService jwtService = new JwtService();
-        User user = userService.getUserByEmail(email);
-        String token = jwtService.generateToken(user);
-        System.out.println("Email reçu dans la requête : '" + email + "'");
-
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().body("L'email est vide ou invalide.");
-        }
-
-        boolean result = userService.generatePasswordResetToken(email);
-        if (result) {
-            emailService.sendResetPasswordEmail(email, token);
-            return ResponseEntity.ok("Un lien de réinitialisation a été envoyé à votre e-mail.");
-
+    @PutMapping("/ActiveUser/{id}")
+    public ResponseEntity<String> ActiveUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        boolean updated = userService.activUser(id);
+        if (updated) {
+            return ResponseEntity.ok("User updated Active successfully.");
         } else {
-            return ResponseEntity.badRequest().body("Aucun utilisateur trouvé avec cet e-mail.");
+            return ResponseEntity.badRequest().body("User not found or update failed.");
         }
     }
 
-    /**
-     * Endpoint pour réinitialiser le mot de passe avec un token.
-
-    @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        System.out.println("Received token: " + token);  // Debugging print to check if token is correct
-        boolean result = userService.resetPassword(token, newPassword);
-        if (result) {
-            return ResponseEntity.ok("Mot de passe réinitialisé avec succès.");
-        } else {
-            return ResponseEntity.badRequest().body("Token invalide ou expiré.");
-        }
-    }
-*/
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         String email = request.getEmail(); // On récupère l'email de l'objet envoyé
@@ -148,8 +188,6 @@ public class AuthController {
         }
         return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Aucun utilisateur trouvé avec cet email."));
     }
-
-
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
         String email = jwtService.extractUsername(token); // Extraction de l'email du token
@@ -158,15 +196,10 @@ public class AuthController {
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("Utilisateur introuvable.");
         }
-
         User user = userOptional.get();
-
         // Optionnel : vous pouvez vérifier que le token n'est pas expiré, selon votre logique
-
-
         user.setMdp(passwordEncoder.encode(newPassword)); // Encodage du nouveau mot de passe
         userRepo.save(user); // Sauvegarde du mot de passe réinitialisé
-
         return ResponseEntity.ok("Votre mot de passe a été réinitialisé avec succès.");
     }
     @PostMapping("/test-email")
@@ -178,20 +211,28 @@ public class AuthController {
             return ResponseEntity.status(500).body("Erreur : " + e.getMessage());
         }
     }
-
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam String token) {
         User user = userService.findByVerificationToken(token);
         if (user == null) {
             return ResponseEntity.badRequest().body("Token invalide !");
         }
-
         user.setIs_verified(true);
         user.setVerificationToken(null);
         userService.saveUser(user);
-
         return ResponseEntity.ok("Email vérifié avec succès !");
     }
 
+    @GetMapping("/search")
+    public List<User> search(@RequestParam("query") String query) {
+        // Fetch all users from the service
+        List<User> allItems = userService.getAllUsers();
+
+        // Perform search filtering on 'nom' and 'email'
+        return allItems.stream()
+                .filter(item -> item.getNom().toLowerCase().contains(query.toLowerCase()) ||
+                        item.getEmail().toLowerCase().contains(query.toLowerCase()))
+                .collect(Collectors.toList());
+    }
 
 }

@@ -171,7 +171,6 @@ public class User {
         this.abonnement = abonnement;
     }
 
-
     public User() {}
 }
 
