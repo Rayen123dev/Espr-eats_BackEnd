@@ -5,19 +5,21 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.projet_pi.Repository.ProduitHistoriqueRepository;
+import tn.esprit.projet_pi.Service.AiSearchService;
 import tn.esprit.projet_pi.Service.IAlertService;
 import tn.esprit.projet_pi.Service.IProduitService;
 import tn.esprit.projet_pi.Service.ProduitHistoriqueService;
 import tn.esprit.projet_pi.entity.Produit;
 import tn.esprit.projet_pi.entity.TypeTransaction;
-
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @AllArgsConstructor
 @RequestMapping("/produit")
 public class ProduitController {
@@ -31,7 +33,8 @@ public class ProduitController {
     @Autowired
     private IAlertService alertService;
 
-
+    @Autowired
+    private AiSearchService aiSearchService;
     /// /////////CRUD///////////////
     // http://localhost:8081/retrieve-all-produits
     @GetMapping("/retrieve-all-produits")
@@ -44,6 +47,7 @@ public class ProduitController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
     @Transactional
     @PostMapping("/add-produit")
     public ResponseEntity<Produit> addProduit(@RequestBody Produit produit) {
@@ -57,32 +61,33 @@ public class ProduitController {
             return ResponseEntity.status(500).body(null);
         }
     }
+
     @Transactional
     @DeleteMapping("/remove-produit/{produit-id}")
     public ResponseEntity<String> removeProduit(@PathVariable("produit-id") Integer produitId) {
-        try {
+//        try {
             // Fetch the product
             Produit produit = produitService.getProduitById(produitId);
 
             if (produit == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Produit not found");
             }
-            try {
-                produitHistoriqueService.createHistory(produit, TypeTransaction.DELETED, produit.getQuantite());
-                System.out.println("History created successfully for produit: " + produit.getNomProduit());
-            } catch (Exception e) {
-                System.out.println("Error while creating history: " + e.getMessage());
+//            try {
+//                produitHistoriqueService.createHistory(produit, TypeTransaction.DELETED, produit.getQuantite());
+//                System.out.println("History created successfully for produit: " + produit.getNomProduit());
+//            } catch (Exception e) {
+//                System.out.println("Error while creating history: " + e.getMessage());
 
-            }
+            //}
+           // produitHistoriqueRepository.flush();
 
-            // Now delete the product from the database
             produitService.deleteProduit(produitId);
 
             return ResponseEntity.ok("Produit deleted successfully and history created");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting produit");
-        }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting produit");
+//        }
     }
 
     @Transactional
@@ -107,7 +112,8 @@ public class ProduitController {
         }
 
     }
-    ///////////////// alerts /////////////////
+
+    /// ////////////// alerts /////////////////
     @GetMapping("/alerts/low-stock")
     public ResponseEntity<List<Produit>> getLowStockAlerts() {
         List<Produit> alerts = alertService.getLowStockAlerts();
@@ -127,16 +133,19 @@ public class ProduitController {
         List<Produit> alerts = alertService.getAllAlerts();
         return ResponseEntity.ok(alerts);
     }
-/// ///////////////// barcode ///////////////////////
-@GetMapping("/barcode/{barcode}")
-public ResponseEntity<Produit> getProductByBarcode(@PathVariable String barcode) {
-    Produit product = produitService.getProductByBarcode(barcode);
-    if (product != null) {
-        return ResponseEntity.ok(product);
-    } else {
-        return ResponseEntity.notFound().build();
+
+    /// ///////////////// barcode ///////////////////////
+    @GetMapping("/barcode/{barcode}")
+    public ResponseEntity<Produit> getProductByBarcode(@PathVariable String barcode) {
+        Produit product = produitService.getProductByBarcode(barcode);
+        if (product != null) {
+            return ResponseEntity.ok(product);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
-}
+
+
     @PostMapping("/barcode/upload-barcode")
     public ResponseEntity<String> uploadBarcode(@RequestParam("barcode") MultipartFile file) {
         try {
@@ -154,11 +163,12 @@ public ResponseEntity<Produit> getProductByBarcode(@PathVariable String barcode)
         }
     }
 
-/// ///////////////////statt///////////////
-@GetMapping("/low-stock-count")
-public long getLowStockCount(@RequestParam(defaultValue = "5") int threshold) {
-    return produitService.getLowStockCount(threshold);
-}
+    /// ///////////////////statt///////////////
+    @GetMapping("/low-stock-count")
+    public long getLowStockCount(@RequestParam(defaultValue = "5") int threshold) {
+        return produitService.getLowStockCount(threshold);
+    }
+
     // Endpoint to get count of expired products
     @GetMapping("expired-count")
     public long getExpiredProductCount() {
@@ -176,6 +186,7 @@ public long getLowStockCount(@RequestParam(defaultValue = "5") int threshold) {
     public long getTotalProductCount() {
         return produitService.getTotalProductCount();
     }
+
     @GetMapping("out-of-stock-count")
     public long getOutOfStockCount() {
         return produitService.getOutOfStockCount();
@@ -185,4 +196,16 @@ public long getLowStockCount(@RequestParam(defaultValue = "5") int threshold) {
     public List<Produit> getProductsNearExpiry(@PathVariable int daysBeforeExpiry) {
         return produitService.getProductsNearExpiry(daysBeforeExpiry);
     }
+
+    /// ///////ai
+//    @PostMapping("/parse")
+//    public Map<String, String> parseQuery(@RequestBody Map<String, String> input) throws Exception {
+//        String userQuery = input.get("query");
+//        String rawOutput = aiSearchService.getSqlCondition(userQuery);
+//
+//        // Optional: extract only the generated SQL
+//        String condition = rawOutput.replaceAll(".*\"generated_text\":\"", "").replaceAll("\".*", "");
+//
+//        return Map.of("filter", condition);
+//    }
 }

@@ -134,7 +134,6 @@ public class PlatController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updatePlat(@PathVariable Long id, @RequestBody Plat platDetails, @RequestParam(required = false) Long userId) {
     public ResponseEntity<?> updatePlat(@PathVariable Long id, @RequestBody Plat platDetails,
                                         @RequestParam(required = false) Long userId) {
         if (userId == null) {
@@ -169,7 +168,6 @@ public class PlatController {
             return ResponseEntity.ok(platRepository.save(plat));
         } else {
             return ResponseEntity.notFound().build(); // Retourne un 404 si le plat n'existe pas
-            return ResponseEntity.notFound().build();
         }
     }
 
@@ -227,6 +225,7 @@ public class PlatController {
 
         return ResponseEntity.ok().body("Image URL ajoutée avec succès");
     }
+
 
     // Modified addplatWithImage method to accept JSON instead of multipart form
     @PostMapping(value = "/addplatWithImage", consumes = {"multipart/form-data"})

@@ -1,13 +1,20 @@
 package tn.esprit.projet_pi.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.LuminanceSource;
 import com.google.zxing.MultiFormatReader;
 import com.google.zxing.common.HybridBinarizer;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.projet_pi.Repository.ProduitRepository;
 import tn.esprit.projet_pi.entity.Produit;
@@ -16,16 +23,16 @@ import com.google.zxing.Result;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 public class ProduitService implements IProduitService {
     @Autowired
     private  ProduitRepository produitRepository;
+
     @Override
     public Produit addProduit(Produit produit) {
         if (produit.getBarcode() == null || produit.getBarcode().isEmpty()) {
@@ -148,5 +155,8 @@ public class ProduitService implements IProduitService {
                 .filter(produit -> produit.getDate_peremption().before(expiryThreshold) && produit.getDate_peremption().after(currentDate))
                 .collect(Collectors.toList());
     }
+
+    /// /////////////  AI //////////////////
+
 
 }

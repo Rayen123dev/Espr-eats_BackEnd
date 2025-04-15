@@ -64,7 +64,7 @@ public class ProduitHistorique {
     // Relation avec Produit (Many-to-One)
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "produit_id",nullable = true)
-    @JsonIgnoreProperties("historiques") // Prevent infinite recursion
+    @JsonIgnoreProperties("historiques")
     private Produit produit;
 
     // Relation avec Type de Transaction (enum)

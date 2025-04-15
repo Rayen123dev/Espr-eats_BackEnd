@@ -19,4 +19,6 @@ public interface IProduitService {
     public long getTotalProductCount();
     public long getOutOfStockCount();
     public List<Produit> getProductsNearExpiry(int daysBeforeExpiry);
+
+
 }
