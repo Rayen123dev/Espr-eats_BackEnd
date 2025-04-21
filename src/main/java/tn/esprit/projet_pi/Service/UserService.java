@@ -37,7 +37,10 @@ public class UserService implements UserInterface{
         if (user.isPresent()) {
             User u = user.get();
             if (passwordEncoder.matches(password,u.getMdp()))
+                u.setLastLogin(LocalDateTime.now());
+                userRepo.save(u);
                 return JwtService.generateToken(u);
+
         }
         return null;
 
@@ -105,7 +108,7 @@ public class UserService implements UserInterface{
     @Override
     public boolean blocUser(Long id) {
         return userRepo.findByidUser(id).map(user -> {
-            user.setIs_verified(Boolean.valueOf("NULL"));
+            user.setVerified(Boolean.valueOf("NULL"));
             userRepo.save(user);
             return true;
         }).orElse(false);
@@ -114,11 +117,16 @@ public class UserService implements UserInterface{
     @Override
     public boolean activUser(Long id) {
         return userRepo.findByidUser(id).map(user -> {
-            user.setIs_verified(Boolean.valueOf("TRUE"));
-            userRepo.save(user);
-            return true;
-        }).orElse(false);
+            // Log the user object to see if it's being retrieved correctly
+            System.out.println("Found user: " + user);
+
+            user.setVerified(true);  // Set the verified status to true
+            userRepo.save(user);  // Save the updated user
+
+            return true;  // Return true indicating success
+        }).orElse(false);  // If the user is not found, return false
     }
+
 
     public User findByVerificationToken(String token) {
         return userRepo.findByVerificationToken(token);

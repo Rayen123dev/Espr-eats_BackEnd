@@ -39,11 +39,9 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/login", "/login/**", "/oauth2/authorization/**", "/login/oauth2/code/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/verify-email").permitAll() // ✅ Autoriser vérification email
                         .requestMatchers("/api/auth/**", "/api/auth/user_del/**", "/api/reclamations/**", "/api/abonnement/**", "/api/application/**", "/api/offer/**").permitAll()
                         .requestMatchers("/api/menus/**").permitAll()
-                        //.requestMatchers("/api/plats/**").hasRole("Staff")
-                        //.requestMatchers("/api/regimes/**").permitAll()
                         .requestMatchers("/api/regimes/**").hasRole("Staff")
                         .requestMatchers("/api/plats/**").permitAll()
                         .anyRequest().authenticated()
@@ -52,12 +50,14 @@ public class SecurityConfig {
                 .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // Add this line
+                                .userService(customOAuth2UserService)
                         )
                         .successHandler(successHandler)
                 );
+
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
