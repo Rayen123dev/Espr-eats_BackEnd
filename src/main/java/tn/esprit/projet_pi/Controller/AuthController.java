@@ -211,17 +211,41 @@ public class AuthController {
             return ResponseEntity.status(500).body("Erreur : " + e.getMessage());
         }
     }
+    @CrossOrigin(origins = "http://localhost:4200")
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        // Look for the user by verification token
         User user = userService.findByVerificationToken(token);
+
         if (user == null) {
-            return ResponseEntity.badRequest().body("Token invalide !");
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Token invalide ou expiré !");
+            return ResponseEntity.badRequest().body(response);
         }
-        user.setIs_verified(true);
+
+        // Check if the user is already verified
+        if (Boolean.TRUE.equals(user.getVerified())) {  // Safely checking for null
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "L'email a déjà été vérifié.");
+            return ResponseEntity.ok(response);
+        }
+
+        // Set the user as verified and remove the verification token
+        user.setVerified(true);
         user.setVerificationToken(null);
+
+        // Save the updated user to the database
         userService.saveUser(user);
-        return ResponseEntity.ok("Email vérifié avec succès !");
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Email vérifié avec succès !");
+
+        // Return a success response
+        return ResponseEntity.ok(response);
     }
+
+
+
 
     @GetMapping("/search")
     public List<User> search(@RequestParam("query") String query) {
