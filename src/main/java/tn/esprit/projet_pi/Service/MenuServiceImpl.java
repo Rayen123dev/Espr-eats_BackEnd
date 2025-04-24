@@ -340,4 +340,6 @@ public class MenuServiceImpl implements MenuService {
     public List<RegimeAlimentaire> returnregime() {
         return regimeAlimentaireRepository.findAll();
     }
+
+
 }

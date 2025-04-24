@@ -26,7 +26,8 @@ public class User {
     private String telephone;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private Boolean is_verified;
+    @Column(name = "is_verified")
+    private Boolean verified;
     @Column(unique = true)
     private String resetToken;
     private LocalDateTime resetTokenExpiry;
@@ -34,6 +35,18 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL)
     private Abonnement abonnement;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+
+
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
 
     public Long getIdUser() {
         return idUser;
@@ -155,13 +168,14 @@ public class User {
         this.role = role;
     }
 
-    public Boolean getIs_verified() {
-        return is_verified;
+    public Boolean getVerified() {
+        return verified;
     }
 
-    public void setIs_verified(Boolean is_verified) {
-        this.is_verified = is_verified;
+    public void setVerified(Boolean verified) {
+        this.verified = verified;
     }
+
 
     public Abonnement getAbonnement() {
         return abonnement;
@@ -170,7 +184,6 @@ public class User {
     public void setAbonnement(Abonnement abonnement) {
         this.abonnement = abonnement;
     }
-
 
     public User() {}
 }

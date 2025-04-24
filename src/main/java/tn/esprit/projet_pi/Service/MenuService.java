@@ -2,6 +2,7 @@ package tn.esprit.projet_pi.Service;
 
 
 import tn.esprit.projet_pi.entity.Menu;
+import tn.esprit.projet_pi.entity.Plat;
 import tn.esprit.projet_pi.entity.RegimeAlimentaire;
 
 import java.time.LocalDate;

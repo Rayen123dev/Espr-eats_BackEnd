@@ -1,8 +1,8 @@
 package tn.esprit.projet_pi.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.View;
 import tn.esprit.projet_pi.Log.JwtService;
 import tn.esprit.projet_pi.Repository.UserRepo;
 import tn.esprit.projet_pi.entity.User;
@@ -13,12 +13,16 @@ import io.jsonwebtoken.SignatureException;
 
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static java.security.KeyRep.Type.SECRET;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class UserService implements UserInterface{
@@ -33,9 +37,11 @@ public class UserService implements UserInterface{
         if (user.isPresent()) {
             User u = user.get();
             if (passwordEncoder.matches(password,u.getMdp()))
+                u.setLastLogin(LocalDateTime.now());
+                userRepo.save(u);
                 return JwtService.generateToken(u);
-        }
 
+        }
         return null;
 
     }
@@ -99,73 +105,26 @@ public class UserService implements UserInterface{
         return List.of();
     }
 
-    /**
-     * Générer un token de réinitialisation de mot de passe.
-     */
-    public boolean generatePasswordResetToken(String email ) {
-        if (email == null || email.isBlank()) {
-            System.out.println("Email invalide ou vide.");
-            return false;
-        }
-
-        email = email.trim().toLowerCase();
-        System.out.println("Vérification de l'email : '" + email + "'");
-
-        Optional<User> userOptional = userRepo.findByEmailIgnoreCase(email);
-        if (userOptional.isEmpty()) {
-            System.out.println("Aucun utilisateur trouvé avec cet e-mail.");
-            return false;
-        }
-
-        User user = userOptional.get();
-        String token = UUID.randomUUID().toString();
-        user.setResetToken(token);
-        userRepo.save(user);
-
-        System.out.println("Token généré pour l'email : " + email + " -> " + token);
-
-        return true;
+    @Override
+    public boolean blocUser(Long id) {
+        return userRepo.findByidUser(id).map(user -> {
+            user.setVerified(Boolean.valueOf("NULL"));
+            userRepo.save(user);
+            return true;
+        }).orElse(false);
     }
 
+    @Override
+    public boolean activUser(Long id) {
+        return userRepo.findByidUser(id).map(user -> {
+            // Log the user object to see if it's being retrieved correctly
+            System.out.println("Found user: " + user);
 
+            user.setVerified(true);  // Set the verified status to true
+            userRepo.save(user);  // Save the updated user
 
-    /**
-     * Réinitialiser le mot de passe en utilisant un token valide.
-     */
-    public boolean resetPassword(String token, String newPassword) {
-        try {
-            // Décodez le token JWT
-            Claims claims = Jwts.parser()
-                    .setSigningKey(String.valueOf(SECRET))  // Assurez-vous d'utiliser la même clé secrète
-                    .parseClaimsJws(token)  // Cette ligne décode le token
-                    .getBody();  // Extraire le corps du token
-
-            String email = claims.getSubject();  // L'email dans le token
-            Date expiration = claims.getExpiration();  // Date d'expiration du token
-
-            // Vérifier si le token est expiré
-            if (expiration.before(new Date())) {
-                return false;  // Token expiré
-            }
-
-            // Récupérer l'utilisateur avec l'email extrait du token
-            Optional<User> userOpt = userRepo.findByEmail(email);
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                user.setMdp(passwordEncoder.encode(newPassword));  // Hachage du mot de passe
-                user.setResetToken(null);  // Supprimer le token après utilisation
-                user.setResetTokenExpiry(null);  // Supprimer la date d'expiration
-                userRepo.save(user);  // Sauvegarder l'utilisateur avec le nouveau mot de passe
-                return true;
-            }
-        } catch (SignatureException e) {
-            System.out.println("Erreur de signature du token : " + e.getMessage());
-            return false;  // Erreur de signature
-        } catch (Exception e) {
-            System.out.println("Erreur de parsing du token : " + e.getMessage());
-            return false;  // Autres erreurs de parsing
-        }
-        return false;
+            return true;  // Return true indicating success
+        }).orElse(false);  // If the user is not found, return false
     }
 
 
@@ -177,30 +136,21 @@ public class UserService implements UserInterface{
         userRepo.save(user);
     }
 
-    /*public boolean generatePasswordResetToken(String email) {
-        Optional<User> userOpt = userRepo.findByEmail(email);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            String token = UUID.randomUUID().toString(); // Générer un token unique
-            user.setResetToken(token);
-            userRepo.save(user);
-            // TODO: Envoyer un e-mail avec le lien contenant le token
-            System.out.println("Lien de réinitialisation : http://localhost:8081/api/auth/reset-password?token=" + token);
-
-            return true;
+    public Page<User> getPaginatedUsers(int page, int size, String filter, String search) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        if (search != null && !search.isEmpty()) {
+            if (filter != null && !filter.isEmpty()) {
+                return userRepo.findByRoleAndNomContainingIgnoreCase(filter, search, pageable);
+            } else {
+                return userRepo.findByNomContainingIgnoreCase(search, pageable);
+            }
+        } else {
+            if (filter != null && !filter.isEmpty()) {
+                return userRepo.findByRole(filter, pageable);
+            } else {
+                return userRepo.findAll(pageable);
+            }
         }
-        return false;
-    }*/
+    }
 
-    /*public boolean resetPassword(String token, String newPassword) {
-        Optional<User> userOpt = userRepo.findByResetToken(token);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            user.setMdp(newPassword); // Hachage recommandé avec BCrypt
-            user.setResetToken(null); // Supprimer le token après utilisation
-            userRepo.save(user);
-            return true;
-        }
-        return false;
-    }*/
 }
