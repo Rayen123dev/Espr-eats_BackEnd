@@ -3,12 +3,11 @@ package tn.esprit.projet_pi.Controller;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import tn.esprit.projet_pi.Repository.ProduitHistoriqueRepository;
-import tn.esprit.projet_pi.Service.AiSearchService;
 import tn.esprit.projet_pi.Service.IAlertService;
 import tn.esprit.projet_pi.Service.IProduitService;
 import tn.esprit.projet_pi.Service.ProduitHistoriqueService;
@@ -33,8 +32,7 @@ public class ProduitController {
     @Autowired
     private IAlertService alertService;
 
-    @Autowired
-    private AiSearchService aiSearchService;
+
     /// /////////CRUD///////////////
     // http://localhost:8081/retrieve-all-produits
     @GetMapping("/retrieve-all-produits")
@@ -197,15 +195,24 @@ public class ProduitController {
         return produitService.getProductsNearExpiry(daysBeforeExpiry);
     }
 
-    /// ///////ai
-//    @PostMapping("/parse")
-//    public Map<String, String> parseQuery(@RequestBody Map<String, String> input) throws Exception {
-//        String userQuery = input.get("query");
-//        String rawOutput = aiSearchService.getSqlCondition(userQuery);
-//
-//        // Optional: extract only the generated SQL
-//        String condition = rawOutput.replaceAll(".*\"generated_text\":\"", "").replaceAll("\".*", "");
-//
-//        return Map.of("filter", condition);
-//    }
+    //////////ai
+    @PostMapping("predict")
+    public ResponseEntity<?> getForecast(@RequestBody Map<String, Object> payload) {
+        RestTemplate restTemplate = new RestTemplate();
+        String flaskUrl = "http://localhost:5000/forecast";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(flaskUrl, request, String.class);
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error while communicating with Flask service: " + e.getMessage());
+        }
+    }
+
+
 }

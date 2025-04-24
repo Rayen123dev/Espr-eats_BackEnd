@@ -29,7 +29,6 @@ public class ProduitHistoriqueService  {
     @Transactional
     public void createHistory(Produit produit, TypeTransaction typeTransaction, int quantite) {
 
-
         Produit loadedProduit = produitRepository.findById(produit.getProduitID()).orElse(null);
 
         if (loadedProduit == null) {
@@ -53,10 +52,10 @@ public class ProduitHistoriqueService  {
 //        if (typeTransaction != TypeTransaction.DELETED) {
 //            historique.setProduit(loadedProduit);
 //        }
-
+        historique.setProduit(loadedProduit);
         historique.setType(typeTransaction);
         historique.setQuantite(quantite);
-        historique.setDate(new Date());  // Set the current date and time
+        historique.setDate(new Date());
 
         produitHistoriqueRepository.save(historique);
 
