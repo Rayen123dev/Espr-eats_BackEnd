@@ -47,7 +47,7 @@ public class ProfilNutritionnel {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "profil_allergies", joinColumns = @JoinColumn(name = "profil_id"))
-    @Column(name = "allergie")
+    @Column(name = "allergie", length = 50)
     private Set<AllergieType> allergies;
 
 
