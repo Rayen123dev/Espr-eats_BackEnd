@@ -50,6 +50,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/recommandations/**").permitAll()
                         .requestMatchers("/api/enums/**").permitAll()
                         .requestMatchers("/api/image-analysis/**").permitAll()
+                        .requestMatchers("/produit/**").permitAll()
+                        .requestMatchers("/historique/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
