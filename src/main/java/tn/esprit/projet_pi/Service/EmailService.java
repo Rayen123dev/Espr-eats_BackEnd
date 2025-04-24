@@ -124,8 +124,8 @@ public class EmailService {
     }
 
     public void sendVerificationEmail(String toEmail, String token) {
-        String verificationUrl = "http://localhost:4200/verify-email?token=" + token;
-
+        // Include email in verification URL to display it in the verification page
+        String verificationUrl = "http://localhost:8081/api/auth/verify-email?token=" + token + "&email=" + toEmail;
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -157,9 +157,22 @@ public class EmailService {
                     "            text-align: center;\n" +
                     "            margin-bottom: 20px;\n" +
                     "        }\n" +
+                    "        .logo {\n" +
+                    "            width: 60px;\n" +
+                    "            height: 60px;\n" +
+                    "            background-color: #007bff;\n" +
+                    "            border-radius: 50%;\n" +
+                    "            color: white;\n" +
+                    "            display: flex;\n" +
+                    "            align-items: center;\n" +
+                    "            justify-content: center;\n" +
+                    "            margin: 0 auto 15px;\n" +
+                    "            font-size: 24px;\n" +
+                    "            font-weight: bold;\n" +
+                    "        }\n" +
                     "        .btn {\n" +
                     "            display: inline-block;\n" +
-                    "            background-color: #3498db;\n" +
+                    "            background-color: #007bff;\n" +
                     "            color: white !important;\n" +
                     "            text-decoration: none;\n" +
                     "            padding: 12px 24px;\n" +
@@ -173,21 +186,37 @@ public class EmailService {
                     "            text-align: center;\n" +
                     "            color: #777;\n" +
                     "        }\n" +
+                    "        .highlight {\n" +
+                    "            color: #007bff;\n" +
+                    "            font-weight: bold;\n" +
+                    "        }\n" +
+                    "        .verification-box {\n" +
+                    "            background-color: #e8f4ff;\n" +
+                    "            border-radius: 4px;\n" +
+                    "            padding: 15px;\n" +
+                    "            margin: 20px 0;\n" +
+                    "            border-left: 4px solid #007bff;\n" +
+                    "        }\n" +
                     "    </style>\n" +
                     "</head>\n" +
                     "<body>\n" +
                     "    <div class=\"container\">\n" +
                     "        <div class=\"header\">\n" +
+                    "            <div class=\"logo\">U</div>\n" +
                     "            <h2>Vérification de votre adresse e-mail</h2>\n" +
                     "        </div>\n" +
                     "        <p>Bonjour,</p>\n" +
-                    "        <p>Merci de vous être inscrit sur notre plateforme. Pour finaliser votre inscription et activer votre compte, veuillez vérifier votre adresse e-mail en cliquant sur le bouton ci-dessous :</p>\n" +
+                    "        <p>Merci de vous être inscrit sur la plateforme <span class=\"highlight\">University Restaurant</span>. Pour finaliser votre inscription et activer votre compte, veuillez vérifier votre adresse e-mail en cliquant sur le bouton ci-dessous :</p>\n" +
+                    "        <div class=\"verification-box\">\n" +
+                    "            <p>Adresse e-mail à vérifier: <span class=\"highlight\">" + toEmail + "</span></p>\n" +
+                    "        </div>\n" +
                     "        <div style=\"text-align: center;\">\n" +
                     "            <a href=\"" + verificationUrl + "\" class=\"btn\">Vérifier mon adresse e-mail</a>\n" +
                     "        </div>\n" +
                     "        <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.</p>\n" +
                     "        <p>Ce lien de vérification expirera dans 24 heures.</p>\n" +
                     "        <div class=\"footer\">\n" +
+                    "            <p>University Restaurant - Votre restaurant universitaire</p>\n" +
                     "            <p>Cet e-mail a été envoyé automatiquement, merci de ne pas y répondre.</p>\n" +
                     "        </div>\n" +
                     "    </div>\n" +
@@ -204,7 +233,6 @@ public class EmailService {
             throw new RuntimeException("Erreur lors de l'envoi de l'email de vérification", e);
         }
     }
-
 
     public void sendReclamationResponse(String recipientEmail, String subject, String messageContent, Reclamation reclamation) {
         if (recipientEmail == null || recipientEmail.trim().isEmpty()) {

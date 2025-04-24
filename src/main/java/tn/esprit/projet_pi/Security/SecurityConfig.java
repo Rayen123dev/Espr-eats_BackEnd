@@ -2,6 +2,7 @@ package tn.esprit.projet_pi.Security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,11 +38,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/login/**", "/oauth2/authorization/**", "/login/oauth2/code/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/verify-email").permitAll() // ✅ Autoriser vérification email
                         .requestMatchers("/api/auth/**", "/api/auth/user_del/**", "/api/reclamations/**", "/api/abonnement/**", "/api/application/**", "/api/offer/**").permitAll()
                         .requestMatchers("/api/menus/**").permitAll()
-                        //.requestMatchers("/api/plats/**").hasRole("Staff")
-                        //.requestMatchers("/api/regimes/**").permitAll()
                         .requestMatchers("/api/regimes/**").hasRole("Staff")
                         .requestMatchers("/api/plats/**").permitAll()
                         .requestMatchers("/api/consultations/**").permitAll()
@@ -57,12 +57,14 @@ public class SecurityConfig {
                 .cors(customizer -> customizer.configurationSource(corsConfigurationSource()))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService) // Add this line
+                                .userService(customOAuth2UserService)
                         )
                         .successHandler(successHandler)
                 );
+
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -78,6 +80,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:4200");
+        configuration.addAllowedOrigin("http://192.168.1.19:4200");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
