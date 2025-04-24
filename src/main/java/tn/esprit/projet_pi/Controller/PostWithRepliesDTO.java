@@ -1,7 +1,7 @@
-package com.example.forum.Controller;
+//package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 
-import com.example.forum.Entity.Post;
-
+import tn.esprit.projet_pi.entity.Post;
 import java.util.List;
 
 public class PostWithRepliesDTO {

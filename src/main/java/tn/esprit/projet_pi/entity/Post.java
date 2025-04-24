@@ -1,5 +1,5 @@
-package com.example.forum.Entity;
-
+//package com.example.forum.Entity;
+package tn.esprit.projet_pi.entity;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;

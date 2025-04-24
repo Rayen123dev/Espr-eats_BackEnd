@@ -1,9 +1,7 @@
-package com.example.forum.Service;
+//package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
 
-import com.example.forum.Entity.Post;
-import com.example.forum.Entity.User;
-import com.example.forum.Repository.PostRepository;
-import com.example.forum.Repository.UserRepository;
+
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import tn.esprit.projet_pi.Repository.PostRepository;
+import tn.esprit.projet_pi.Repository.UserRepo;
+import tn.esprit.projet_pi.entity.Post;
+import tn.esprit.projet_pi.entity.User;
 
 import java.util.List;
 
@@ -21,8 +23,8 @@ public class EngagementService {
 
     private static final Logger log = LoggerFactory.getLogger(EngagementService.class);
     private final PostRepository postRepository;
-    private final EmailService emailService;
-    private final UserRepository userRepository;
+    private final EmailForumService emailService;
+    private final UserRepo userRepository;
 
     @Value("${engagement.threshold}")
     private int engagementThreshold;
@@ -30,8 +32,8 @@ public class EngagementService {
     // Explicit constructor for dependency injection
     @Autowired
     public EngagementService(PostRepository postRepository,
-                             EmailService emailService,
-                             UserRepository userRepository) {
+                             EmailForumService emailService,
+                             UserRepo userRepository) {
         this.postRepository = postRepository;
         this.emailService = emailService;
         this.userRepository = userRepository;

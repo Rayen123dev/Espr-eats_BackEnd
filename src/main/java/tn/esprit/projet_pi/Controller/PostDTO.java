@@ -1,7 +1,8 @@
-package com.example.forum.Controller;
+//package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 
-import com.example.forum.Entity.Post;
-import com.example.forum.Entity.Reaction;
+
+import tn.esprit.projet_pi.entity.Post;
 
 import java.time.LocalDateTime;
 import java.util.*;

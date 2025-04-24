@@ -1,12 +1,6 @@
-package com.example.forum.Controller;
+//package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 
-import com.example.forum.Entity.Post;
-import com.example.forum.Entity.User;
-import com.example.forum.Repository.PostRepository;
-import com.example.forum.Repository.ReactionRepository;
-import com.example.forum.Repository.UserRepository;
-import com.example.forum.Service.FileStorageService;
-import com.example.forum.Service.IPostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -18,6 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
+import tn.esprit.projet_pi.Repository.PostRepository;
+import tn.esprit.projet_pi.Repository.ReactionRepository;
+import tn.esprit.projet_pi.Repository.UserRepo;
+import tn.esprit.projet_pi.Service.FileStorageService;
+import tn.esprit.projet_pi.Service.IPostService;
+import tn.esprit.projet_pi.entity.Post;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -32,7 +32,7 @@ public class PostRestController {
     @Autowired
     IPostService postService;
     @Autowired
-    UserRepository userRepository;
+    UserRepo userRepository;
     @Autowired
     PostRepository postRepository;
     @Autowired

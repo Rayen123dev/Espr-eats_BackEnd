@@ -1,10 +1,11 @@
-package com.example.forum.Controller;
+//package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 
-import com.example.forum.Service.IPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
+import tn.esprit.projet_pi.Service.IPostService;
 
 @RestController
 @RequestMapping("/admin/posts")

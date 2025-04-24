@@ -1,13 +1,16 @@
-package com.example.forum.Service;
+//package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
 
-import com.example.forum.Controller.PostDTO;
-import com.example.forum.Entity.Post;
-import com.example.forum.Repository.PostRepository;
+//import com.example.forum.Entity.Post;
+
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import tn.esprit.projet_pi.Controller.PostDTO;
+import tn.esprit.projet_pi.Repository.PostRepository;
+import tn.esprit.projet_pi.entity.Post;
 
 
 import java.util.List;

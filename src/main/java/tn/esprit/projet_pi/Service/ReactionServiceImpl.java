@@ -1,14 +1,18 @@
-package com.example.forum.Service;
+//package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
 
-import com.example.forum.Entity.EmojiType;
-import com.example.forum.Entity.Reaction;
-import com.example.forum.Repository.PostRepository;
-import com.example.forum.Repository.ReactionRepository;
-import com.example.forum.Repository.UserRepository;
+//import com.example.forum.Entity.Reaction;
+
+//import com.example.forum.Repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tn.esprit.projet_pi.Repository.PostRepository;
+import tn.esprit.projet_pi.Repository.ReactionRepository;
+import tn.esprit.projet_pi.Repository.UserRepo;
+import tn.esprit.projet_pi.entity.EmojiType;
+import tn.esprit.projet_pi.entity.Reaction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,7 +26,7 @@ public class ReactionServiceImpl implements IReactionService{
     ReactionRepository reactionRepository;
 
     @Autowired
-    UserRepository userRepository;
+    UserRepo userRepository;
 
     @Autowired
     PostRepository postRepository;

@@ -1,4 +1,5 @@
-package com.example.forum.Service;
+//package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;

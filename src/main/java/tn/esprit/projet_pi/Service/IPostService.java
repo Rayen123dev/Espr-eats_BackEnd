@@ -1,8 +1,9 @@
-package com.example.forum.Service;
+//package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
 
-import com.example.forum.Controller.PostDTO;
-import com.example.forum.Entity.Post;
 import org.springframework.data.domain.Page;
+import tn.esprit.projet_pi.Controller.PostDTO;
+import tn.esprit.projet_pi.entity.Post;
 
 import java.util.List;
 import java.util.Optional;

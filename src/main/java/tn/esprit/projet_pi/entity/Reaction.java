@@ -1,4 +1,5 @@
-package com.example.forum.Entity;
+//package com.example.forum.Entity;
+package tn.esprit.projet_pi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

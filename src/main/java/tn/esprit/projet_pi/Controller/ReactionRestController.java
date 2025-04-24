@@ -1,14 +1,15 @@
-package com.example.forum.Controller;
+//package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 
-import com.example.forum.Entity.EmojiType;
-import com.example.forum.Entity.Post;
-import com.example.forum.Entity.Reaction;
-import com.example.forum.Service.IReactionService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tn.esprit.projet_pi.Service.IReactionService;
+import tn.esprit.projet_pi.entity.EmojiType;
+import tn.esprit.projet_pi.entity.Post;
+import tn.esprit.projet_pi.entity.Reaction;
 
 import java.util.*;
 import java.util.stream.Collectors;

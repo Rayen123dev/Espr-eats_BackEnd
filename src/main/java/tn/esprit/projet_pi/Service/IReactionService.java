@@ -1,7 +1,8 @@
-package com.example.forum.Service;
-
-import com.example.forum.Entity.EmojiType;
-import com.example.forum.Entity.Reaction;
+//package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
+import tn.esprit.projet_pi.entity.EmojiType;
+import tn.esprit.projet_pi.entity.Reaction;
+//import com.example.forum.Entity.Reaction;
 
 import java.util.List;
 import java.util.Optional;

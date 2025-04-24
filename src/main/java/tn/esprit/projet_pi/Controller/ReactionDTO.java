@@ -1,7 +1,9 @@
-package com.example.forum.Controller;
+//package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 
-import com.example.forum.Entity.EmojiType;
-import com.example.forum.Entity.Reaction;
+
+import tn.esprit.projet_pi.entity.EmojiType;
+import tn.esprit.projet_pi.entity.Reaction;
 
 import java.time.LocalDateTime;
 
