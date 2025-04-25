@@ -77,6 +77,30 @@ public class EmailAbonnementService {
     }
 
     @Async
+    public void sendStripeUrl(User user, String checkoutUrl) {
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(user.getEmail());
+            helper.setSubject("Complete Your Subscription Payment");
+
+            // Load the Stripe payment email template
+            Resource resource = resourceLoader.getResource("classpath:templates/stripe-payment-email.html");
+            String htmlTemplate = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
+
+            // Replace placeholders
+            String htmlContent = htmlTemplate
+                    .replace("${userName}", user.getNom())
+                    .replace("${checkoutUrl}", checkoutUrl);
+
+            helper.setText(htmlContent, true);
+            javaMailSender.send(message);
+        } catch (MessagingException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Async
     public void sendGenericEmail(String email, String subject, String messageContent) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);

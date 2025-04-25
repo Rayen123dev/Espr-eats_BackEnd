@@ -52,6 +52,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/image-analysis/**").permitAll()
                         .requestMatchers("produit/**").permitAll()
                         .requestMatchers("historique/**").permitAll()
+                        .requestMatchers("/api/abonnement/**").permitAll()
+                        .requestMatchers("/api/discount/**").permitAll()
+                        .requestMatchers("/api/transaction/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
