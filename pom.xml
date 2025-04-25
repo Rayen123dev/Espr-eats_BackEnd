@@ -57,6 +57,16 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-server</artifactId>
             <version>2.5.0</version>
@@ -138,9 +148,32 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version><!-- ou la version qui fonctionne bien avec Spring Security -->
         </dependency>
+        <!-- ZXing Core dependency -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.0</version> <!-- Use the appropriate version -->
+        </dependency>
 
+        <!-- ZXing J2SE dependency -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.0</version> <!-- Use the appropriate version -->
+        </dependency>
 
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.0</version> <!-- or the latest version -->
+        </dependency>
 
+        <!-- ZXing Java SE (J2SE) Dependency -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.0</version> <!-- or the latest version -->
+        </dependency>
 
 
     </dependencies>
