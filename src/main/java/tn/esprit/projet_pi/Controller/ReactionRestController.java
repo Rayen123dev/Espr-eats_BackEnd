@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/reaction")
 //@CrossOrigin(origins = "http://localhost:4200/posts")  // Allow requests from your frontend
 public class ReactionRestController {

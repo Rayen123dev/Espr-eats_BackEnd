@@ -24,6 +24,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static sun.font.CreatedFontTracker.MAX_FILE_SIZE;
+
 @CrossOrigin(origins = "http://localhost:4200") // Allow Angular frontend to access the API
 @RestController
 @AllArgsConstructor
@@ -126,6 +128,17 @@ public class PostRestController {
 
             // Handle file upload
             if (file != null && !file.isEmpty()) {
+                // Validate file type and size
+                if (!isValidFileType(file)) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "Invalid file type. Only images are allowed."));
+                }
+                if (file.getSize() > MAX_FILE_SIZE) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("error", "File is too large. Maximum size is " + MAX_FILE_SIZE + " bytes."));
+                }
+
+                // Store file and get media URL
                 String mediaUrl = fileStorageService.storeFile(file);
                 post.setMediaURL(mediaUrl);
                 System.out.println("Successfully stored file: " + mediaUrl);
@@ -156,6 +169,13 @@ public class PostRestController {
                     .body(Map.of("error", "Failed to create post"));
         }
     }
+
+    // Helper method to validate file type (e.g., image)
+    private boolean isValidFileType(MultipartFile file) {
+        String fileType = file.getContentType();
+        return fileType != null && fileType.startsWith("image/");
+    }
+
     private void validateFile(MultipartFile file) throws IllegalArgumentException {
         // Validate file type
         String contentType = file.getContentType();
