@@ -121,6 +121,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.13</version><!-- ou la version qui fonctionne bien avec Spring Security -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>3.3.0</version>
+        </dependency>
 
 
 
