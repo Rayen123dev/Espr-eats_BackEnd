@@ -55,6 +55,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/abonnement/**").permitAll()
                         .requestMatchers("/api/discount/**").permitAll()
                         .requestMatchers("/api/transaction/**").permitAll()
+                        .requestMatchers("/post/**").permitAll()
+                        .requestMatchers("/reaction/**").permitAll()
+                        .requestMatchers("/admin/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
