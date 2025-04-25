@@ -36,14 +36,13 @@ public class UserService implements UserInterface{
         Optional<User> user = userRepo.findByEmail(email);
         if (user.isPresent()) {
             User u = user.get();
-            if (passwordEncoder.matches(password,u.getMdp()))
+            if (passwordEncoder.matches(password, u.getMdp())) {
                 u.setLastLogin(LocalDateTime.now());
                 userRepo.save(u);
                 return JwtService.generateToken(u);
-
+            }
         }
         return null;
-
     }
 
     @Override
