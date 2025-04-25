@@ -44,6 +44,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/menus/**").permitAll()
                         .requestMatchers("/api/regimes/**").hasRole("Staff")
                         .requestMatchers("/api/plats/**").permitAll()
+                        .requestMatchers("/api/consultations/**").permitAll()
+                        .requestMatchers("/api/profil/**").authenticated()
+                        .requestMatchers("/api/historique-profil/**").permitAll()
+                        .requestMatchers("/api/recommandations/**").permitAll()
+                        .requestMatchers("/api/enums/**").permitAll()
+                        .requestMatchers("/api/image-analysis/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
