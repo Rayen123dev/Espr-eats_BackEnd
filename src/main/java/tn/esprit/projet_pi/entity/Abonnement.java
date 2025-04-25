@@ -26,6 +26,9 @@ public class Abonnement {
     private LocalDate dateFin;
     private Double cout;
     private long remainingDays;
+    private String stripeSessionId;
+
+    private int failedConfirmationAttempts;
 
 
     @Column(unique = true)
@@ -35,11 +38,11 @@ public class Abonnement {
     private Boolean isBlocked = false;
     private Boolean isConfirmed = false;
 
-    @OneToMany(mappedBy = "abonnement", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "abonnement", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     @JsonIgnore
     private List<Transaction> transactions;
 
-    @OneToOne(mappedBy = "abonnement")
+    @OneToOne(mappedBy = "abonnement",fetch = FetchType.EAGER)
     @JsonIgnore
     private User user;
 
@@ -182,5 +185,20 @@ public class Abonnement {
 
     public long getRemainingDays() {
         return remainingDays;
+    }
+
+    public String getStripeSessionId() {
+        return stripeSessionId;
+    }
+    public void setStripeSessionId(String stripeSessionId) {
+        this.stripeSessionId = stripeSessionId;
+    }
+
+    public int getFailedConfirmationAttempts() {
+        return failedConfirmationAttempts;
+    }
+
+    public void setFailedConfirmationAttempts(int failedConfirmationAttempts) {
+        this.failedConfirmationAttempts = failedConfirmationAttempts;
     }
 }

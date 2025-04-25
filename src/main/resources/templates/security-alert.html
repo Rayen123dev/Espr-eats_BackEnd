@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alert</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #d9534f;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content h2 {
+            color: #d9534f;
+        }
+        .content p {
+            line-height: 1.6;
+        }
+        .highlight {
+            background-color: #f8f8f8;
+            padding: 10px;
+            border-left: 4px solid #d9534f;
+            margin: 10px 0;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        a {
+            color: #d9534f;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Security Alert</h1>
+    </div>
+    <div class="content">
+        <h2>Unauthorized Access Attempt Detected</h2>
+        <p>Dear ${userName},</p>
+        <p>We’ve detected an attempt to use your subscription confirmation code by someone else. Here are the details:</p>
+        <div class="highlight">
+            <p><strong>Confirmation Code:</strong> ${confirmationCode}</p>
+            <p><strong>Date and Time:</strong> ${attemptDate}</p>
+            <p><strong>Approximate Location:</strong> ${location}</p>
+        </div>
+        <p>If this was not you, please take action immediately to secure your account. Contact our support team at <a href="mailto:support@yourdomain.com">support@yourdomain.com</a> for assistance.</p>
+        <p>If you did initiate this action, you can safely ignore this message.</p>
+    </div>
+    <div class="footer">
+        <p>Best regards,<br>Your Service Team</p>
+        <p>© 2025 Your Company. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
