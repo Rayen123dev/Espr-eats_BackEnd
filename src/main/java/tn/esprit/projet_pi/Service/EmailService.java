@@ -125,7 +125,7 @@ public class EmailService {
 
     public void sendVerificationEmail(String toEmail, String token) {
         // Include email in verification URL to display it in the verification page
-        String verificationUrl = "http://localhost:8081/api/auth/verify-email?token=" + token + "&email=" + toEmail;
+        String verificationUrl = "http://localhost:4200/verify-email?token=" + token + "&email=" + toEmail;
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
