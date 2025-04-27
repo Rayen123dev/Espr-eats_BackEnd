@@ -1,4 +1,4 @@
-package com.example.forum.Service;
+package tn.esprit.projet_pi.Service;
 
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
