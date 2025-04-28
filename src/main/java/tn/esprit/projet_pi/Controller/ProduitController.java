@@ -199,7 +199,7 @@ public class ProduitController {
     @PostMapping("predict")
     public ResponseEntity<?> getForecast(@RequestBody Map<String, Object> payload) {
         RestTemplate restTemplate = new RestTemplate();
-        String flaskUrl = "http://localhost:5000/forecast";
+        String flaskUrl = "http://172.20.10.11:5001/forecast";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

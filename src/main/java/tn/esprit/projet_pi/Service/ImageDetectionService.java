@@ -30,7 +30,7 @@ public class ImageDetectionService {
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        String flaskUrl = "http://localhost:5000/detect"; // <--- Vérifie bien que Flask tourne à cette URL
+        String flaskUrl = "http://172.20.10.12:5002/detect"; // <--- Vérifie bien que Flask tourne à cette URL
 
         ResponseEntity<Map> response = restTemplate.postForEntity(flaskUrl, requestEntity, Map.class);
         return response.getBody();

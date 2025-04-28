@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/reaction/**").permitAll()
                         .requestMatchers("/admin/**").permitAll()
                         .requestMatchers("/forum-uploads/**").permitAll()
+                        .requestMatchers("/predict").permitAll()
 
                         .anyRequest().authenticated()
                 )
@@ -82,7 +83,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:4200");
-        configuration.addAllowedOrigin("http://192.168.1.19:4200");
+        configuration.addAllowedOrigin("http://172.20.10.2:4200");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
