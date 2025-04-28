@@ -1,12 +1,12 @@
 package tn.esprit.projet_pi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -24,10 +24,12 @@ public class JobOffer {
     private String jobDescription;
     private Date date;
     private String skills;
+    private String image;
+
 
     @OneToMany(mappedBy = "jobOffer", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("jobOffer")
     private List<JobApplication> applications;
-
 
     public Long getJobOfferId() {
         return jobOfferId;
@@ -61,6 +63,14 @@ public class JobOffer {
         this.date = date;
     }
 
+    public List<JobApplication> getApplications() {
+        return applications;
+    }
+
+    public void setApplications(List<JobApplication> applications) {
+        this.applications = applications;
+    }
+
     public String getSkills() {
         return skills;
     }
@@ -69,11 +79,11 @@ public class JobOffer {
         this.skills = skills;
     }
 
-    public List<JobApplication> getApplications() {
-        return applications;
+    public String getImage() {
+        return image;
     }
 
-    public void setApplications(List<JobApplication> applications) {
-        this.applications = applications;
+    public void setImage(String image) {
+        this.image = image;
     }
 }
