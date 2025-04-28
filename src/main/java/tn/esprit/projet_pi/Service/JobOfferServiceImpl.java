@@ -9,30 +9,43 @@ import java.util.List;
 
 @Service
 public class JobOfferServiceImpl implements IJobOfferService {
+
     private final JobOfferRepository jobOfferRepository;
-@Autowired
+
+    @Autowired
     public JobOfferServiceImpl(JobOfferRepository jobOfferRepository) {
         this.jobOfferRepository = jobOfferRepository;
     }
+
+    @Override
     public JobOffer addNewJoffer(JobOffer offer) {
         return jobOfferRepository.save(offer);
     }
+
+    @Override
     public List<JobOffer> findAllJoffer() {
         return jobOfferRepository.findAll();
     }
+
+    @Override
     public JobOffer findByIdJoffer(Long idJobOffer) {
         return jobOfferRepository.findById(idJobOffer).orElse(null);
     }
-    public JobOffer ModifyJoffer(JobOffer offer) {
-        return jobOfferRepository.save(offer);
+
+    @Override
+    public JobOffer ModifyJoffer(JobOffer jobOffer) {
+        JobOffer existingOffer = jobOfferRepository.findById(jobOffer.getJobOfferId())
+                .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+        if (existingOffer.getApplications() != null && !existingOffer.getApplications().isEmpty()) {
+            throw new RuntimeException("Cannot modify offer with existing applications");
+        }
+
+        return jobOfferRepository.save(jobOffer);
     }
+
+    @Override
     public void deleteById(Long idJobOffer) {
         jobOfferRepository.deleteById(idJobOffer);
     }
-
-
-
-
-
-
 }

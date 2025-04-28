@@ -1,13 +1,11 @@
 package tn.esprit.projet_pi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Getter
@@ -17,37 +15,50 @@ import java.util.Date;
 public class JobApplication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer jobAppID;
-    private String motivation_letter;
-    private String attachment;
+    private Long jobAppID;
+
+    private String motivationAttachment; // Motivation Letter PDF filename
+    private String cvAttachment;          // CV PDF filename
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "jobOfferId")
+
     private JobOffer jobOffer;
 
-
-    public Integer getJobAppID() {
+    public Long getJobAppID() {
         return jobAppID;
     }
 
-    public void setJobAppID(Integer jobAppID) {
+    public void setJobAppID(Long jobAppID) {
         this.jobAppID = jobAppID;
     }
 
-    public String getMotivation_letter() {
-        return motivation_letter;
+    public String getMotivationAttachment() {
+        return motivationAttachment;
     }
 
-    public void setMotivation_letter(String motivation_letter) {
-        this.motivation_letter = motivation_letter;
+    public void setMotivationAttachment(String motivationAttachment) {
+        this.motivationAttachment = motivationAttachment;
     }
 
-    public String getAttachment() {
-        return attachment;
+    public String getCvAttachment() {
+        return cvAttachment;
     }
 
-    public void setAttachment(String attachment) {
-        this.attachment = attachment;
+    public void setCvAttachment(String cvAttachment) {
+        this.cvAttachment = cvAttachment;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public JobOffer getJobOffer() {
