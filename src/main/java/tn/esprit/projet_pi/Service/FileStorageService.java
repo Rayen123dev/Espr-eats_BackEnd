@@ -1,77 +1,89 @@
 package tn.esprit.projet_pi.Service;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @Service
 public class FileStorageService {
-    private static final Logger LOGGER = Logger.getLogger(FileStorageService.class.getName());
-
     private final Path fileStorageLocation;
 
-
-
-    public FileStorageService(@Value("${file.upload-dir}") String uploadDir) {
-        this.fileStorageLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
-
+    @Autowired
+    public FileStorageService(FileStorageProperties fileStorageProperties) {
         try {
-            Files.createDirectories(this.fileStorageLocation);
+            // Use absolute path to avoid Tomcat temp directory issues
+            this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir())
+                    .toAbsolutePath().normalize();
+
+            // Create directory if it doesn't exist
+            if (!Files.exists(this.fileStorageLocation)) {
+                Files.createDirectories(this.fileStorageLocation);
+                System.out.println("Created upload directory: " + this.fileStorageLocation);
+            }
         } catch (Exception ex) {
-            LOGGER.severe("❌ Impossible de créer le répertoire où les fichiers téléchargés seront stockés.");
-            throw new RuntimeException("Impossible de créer le répertoire où les fichiers téléchargés seront stockés.", ex);
+            throw new RuntimeException("Could not initialize file storage", ex);
         }
     }
 
-    public String storeFile(MultipartFile file) {
-        try {
-            // Normalize file name
-            String originalFileName = file.getOriginalFilename();
-            String fileExtension = "";
+    /*public String storeFile(MultipartFile file) throws IOException {
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
-            if (originalFileName != null && originalFileName.contains(".")) {
-                fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        // Validate filename
+        if (fileName.contains("..")) {
+            throw new IOException("Filename contains invalid path sequence: " + fileName);
+        }
+
+        // Generate unique filename
+        String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+        String uniqueFileName = UUID.randomUUID() + fileExtension;
+
+        // Resolve path and copy file
+        Path targetLocation = this.fileStorageLocation.resolve(uniqueFileName);
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+        return uniqueFileName;
+    }*/
+    public String storeFile(MultipartFile file) {
+        // Normalize file name
+        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String fileExtension = "";
+
+        // Extract file extension
+        int dotIndex = originalFileName.lastIndexOf('.');
+        if (dotIndex > 0) {
+            fileExtension = originalFileName.substring(dotIndex);
+        }
+
+        // Generate unique filename
+        String fileName = UUID.randomUUID() + fileExtension;
+
+        try {
+            // Check if the file's name contains invalid characters
+            if (fileName.contains("..")) {
+                throw new RuntimeException(
+                        "Sorry! Filename contains invalid path sequence " + fileName);
             }
 
-            // Generate unique file name
-            String fileName = UUID.randomUUID().toString() + fileExtension;
-
-            // Copy file to the target location
+            // Copy file to the target location (Replacing existing file with the same name)
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            LOGGER.info("✅ Fichier enregistré avec succès: " + fileName);
             return fileName;
         } catch (IOException ex) {
-            LOGGER.severe("❌ Échec du stockage du fichier. Erreur: " + ex.getMessage());
-            throw new RuntimeException("Échec du stockage du fichier.", ex);
+            throw new RuntimeException(
+                    "Could not store file " + fileName + ". Please try again!", ex);
         }
     }
 
-    public Resource loadFileAsResource(String fileName) {
-        try {
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists()) {
-                return resource;
-            } else {
-                LOGGER.warning("⚠️ Fichier non trouvé: " + fileName);
-                throw new RuntimeException("Fichier non trouvé: " + fileName);
-            }
-        } catch (MalformedURLException ex) {
-            LOGGER.severe("❌ Erreur lors du chargement du fichier: " + fileName);
-            throw new RuntimeException("Erreur lors du chargement du fichier: " + fileName, ex);
-        }
+    public Path getFileStorageLocation() {
+        return fileStorageLocation;
     }
 }

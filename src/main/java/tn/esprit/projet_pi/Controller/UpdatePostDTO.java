@@ -1,4 +1,4 @@
-package com.example.forum.Controller;
+package tn.esprit.projet_pi.Controller;
 public class UpdatePostDTO {
     private String content;
     private String mediaURL;
