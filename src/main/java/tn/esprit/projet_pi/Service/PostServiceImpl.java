@@ -42,6 +42,9 @@ public class PostServiceImpl implements IPostService{
     public void deletePost(Integer postId) {
         postRepository.deleteById(postId);
     }
+    public void deletePost1(Integer postId, Integer userID) {
+        postRepository.deleteById(postId);
+    }
 
     @Override
     public Post updatePost(Post post) {
@@ -72,6 +75,7 @@ public class PostServiceImpl implements IPostService{
         Page<Post> posts = postRepository.findAll(PageRequest.of(page, size));
         return posts.map(PostDTO::new);
     }
+
 
     public Page<PostDTO> getPostsByUser(Integer userId, int page, int size) {
         Page<Post> posts = postRepository.findByAuthorIdUser(userId, PageRequest.of(page, size));

@@ -44,6 +44,7 @@ public class PostRestController {
     @Autowired
     private FileStorageService fileStorageService;
 
+
     //http://localhost:8089/forum/swagger-ui/index.html
 
     /*@GetMapping("/get-all-posts")
@@ -194,11 +195,20 @@ public class PostRestController {
         }
     }
 
-    @DeleteMapping("/delete/{postID}")
+    /*@DeleteMapping("/delete/{postID}")
     public ResponseEntity<String> deletePost(@PathVariable Integer postID) {
         postService.deletePost(postID);
         return ResponseEntity.ok("Post deleted successfully.");
+    }*/
+    @DeleteMapping("/delete/{postID}/{userID}")
+    public ResponseEntity<String> deletePost(
+            @PathVariable Integer postID,
+            @PathVariable Integer userID
+    ) {
+        postService.deletePost1(postID, userID);
+        return ResponseEntity.ok("Post deleted successfully.");
     }
+
 
     @PutMapping(value = "/update/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updatePost(
@@ -208,7 +218,9 @@ public class PostRestController {
 
         try {
             // 1. Parse the JSON
-            Post postUpdates = objectMapper.readValue(postJson, Post.class);
+            //Post postUpdates = objectMapper.readValue(postJson, Post.class);
+            PostDTO postUpdates = objectMapper.readValue(postJson, PostDTO.class);
+
 
             // 2. Get existing post
             Post existingPost = postService.findById(postId)
@@ -239,6 +251,7 @@ public class PostRestController {
                     .body(Map.of("error", "Failed to update post"));
         }
     }
+
 
 
     @GetMapping("/search")

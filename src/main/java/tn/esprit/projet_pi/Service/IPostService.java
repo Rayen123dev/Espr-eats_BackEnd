@@ -22,4 +22,5 @@ public interface IPostService {
 
     Page<PostDTO> getAllPosts(int page, int size);
 
+    void deletePost1(Integer postID, Integer userID);
 }
