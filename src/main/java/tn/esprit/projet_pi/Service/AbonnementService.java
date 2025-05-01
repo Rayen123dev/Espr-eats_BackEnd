@@ -31,7 +31,7 @@ public class AbonnementService implements IAbonnement {
     private final EmailAbonnementService emailService;
     private final DiscountRepository discountRepository;
     private final RestTemplate restTemplate;
-    private static final String CPI_API_URL = "http://127.0.0.1:8000/predict";
+    private static final String CPI_API_URL = "http://172.20.10.5:5007/predict";
     private static final double DEFAULT_BASE_CPI = 234.05; // Valeur par défaut si l'API échoue
     private static final LocalDate PREDICTION_DATE = LocalDate.of(2034, 4, 30); // Date fixe pour la prédiction
 
